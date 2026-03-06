@@ -1,0 +1,1086 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>LoanCore360 — ER Diagram v3</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;600;700&family=Syne:wght@400;600;700;800&display=swap');
+:root{--bg:#0a0d14;--surface:#111520;--border:#1e2535;--accent:#00d4ff;--text:#e2e8f0;--muted:#64748b;--pk:#fbbf24;--fk:#60a5fa;--panel:#0d1120;--green:#10b981;--red:#ef4444;--orange:#f59e0b;}
+.lt{--bg:#f0f4f8;--surface:#fff;--border:#d1dbe8;--accent:#0284c7;--text:#1e293b;--muted:#64748b;--pk:#b45309;--fk:#2563eb;--panel:#e8eef5;}
+*{margin:0;padding:0;box-sizing:border-box;}
+body{background:var(--bg);color:var(--text);font-family:'JetBrains Mono',monospace;overflow:hidden;height:100vh;width:100vw;transition:background .3s,color .3s;}
+
+/* ─── HEADER ─── */
+#hdr{position:fixed;top:0;left:0;right:0;z-index:200;padding:6px 12px;background:rgba(10,13,20,.97);border-bottom:1px solid var(--border);display:flex;align-items:center;gap:7px;backdrop-filter:blur(12px);flex-wrap:wrap;}
+.lt #hdr{background:rgba(240,244,248,.97);}
+#logo{font-family:'Syne',sans-serif;font-size:14px;font-weight:800;color:var(--accent);white-space:nowrap;}
+#logo small{font-size:9px;color:var(--muted);font-weight:400;display:block;margin-top:-1px;}
+#sw{position:relative;flex:1;min-width:130px;max-width:220px;}
+#si{width:100%;background:var(--surface);border:1px solid var(--border);border-radius:6px;padding:5px 8px 5px 26px;color:var(--text);font-family:'JetBrains Mono',monospace;font-size:11px;outline:none;transition:border .2s;}
+#si:focus{border-color:var(--accent);}
+#si-ic{position:absolute;left:7px;top:50%;transform:translateY(-50%);color:var(--muted);font-size:11px;pointer-events:none;}
+#sr{position:absolute;top:calc(100% + 3px);left:0;right:0;background:var(--surface);border:1px solid var(--border);border-radius:7px;z-index:300;display:none;max-height:190px;overflow-y:auto;box-shadow:0 8px 32px rgba(0,0,0,.5);}
+.sri{padding:6px 10px;cursor:pointer;font-size:11px;display:flex;align-items:center;gap:6px;transition:background .1s;}
+.sri:hover{background:var(--border);}
+.srb{font-size:9px;padding:1px 4px;border-radius:3px;background:rgba(255,255,255,.07);margin-left:auto;}
+.sep{width:1px;height:20px;background:var(--border);flex-shrink:0;}
+.tb{padding:4px 8px;background:var(--surface);border:1px solid var(--border);border-radius:5px;color:var(--text);font-family:'JetBrains Mono',monospace;font-size:10px;cursor:pointer;display:flex;align-items:center;gap:4px;transition:all .2s;white-space:nowrap;flex-shrink:0;}
+.tb:hover{border-color:var(--accent);color:var(--accent);}
+.tb.on{background:rgba(0,212,255,.1);border-color:var(--accent);color:var(--accent);}
+.tb .i{font-size:11px;}
+#mf{display:flex;gap:3px;flex-wrap:wrap;align-items:center;}
+.mc{padding:2px 6px;border-radius:3px;font-size:9px;cursor:pointer;border:1px solid transparent;opacity:.45;transition:all .15s;}
+.mc.on{opacity:1;border-color:currentColor;}
+
+/* ─── CANVAS ─── */
+#cw{position:fixed;top:48px;left:0;right:0;bottom:36px;overflow:hidden;cursor:grab;}
+#cw.gr{cursor:grabbing;}
+#cv{position:absolute;transform-origin:0 0;}
+svg.cn{position:absolute;top:0;left:0;pointer-events:none;overflow:visible;}
+.gb{position:absolute;top:0;left:0;width:5000px;height:4000px;background-image:linear-gradient(var(--border) 1px,transparent 1px),linear-gradient(90deg,var(--border) 1px,transparent 1px);background-size:40px 40px;opacity:.2;pointer-events:none;}
+.sl{position:absolute;border-radius:12px;border:1.5px dashed;pointer-events:none;opacity:.16;}
+.sl-lbl{position:absolute;font-family:'Syne',sans-serif;font-size:10px;font-weight:700;opacity:.4;letter-spacing:1px;text-transform:uppercase;pointer-events:none;}
+
+/* ─── TABLE CARDS ─── */
+.tc{position:absolute;background:var(--surface);border:1px solid var(--border);border-radius:10px;width:236px;box-shadow:0 4px 20px rgba(0,0,0,.5);transition:box-shadow .2s,border-color .2s,opacity .2s;cursor:move;user-select:none;}
+.tc:hover{box-shadow:0 0 0 2px var(--accent),0 8px 28px rgba(0,212,255,.12);border-color:var(--accent);z-index:50;}
+.tc.act{box-shadow:0 0 0 2px var(--accent),0 12px 36px rgba(0,212,255,.22);border-color:var(--accent);z-index:60;}
+.tc.dim{opacity:.13;pointer-events:none;}
+.tc.tr{box-shadow:0 0 0 3px #f59e0b,0 0 28px rgba(245,158,11,.25)!important;border-color:#f59e0b!important;z-index:55;}
+.tc.col .tb-body{display:none;}
+.tc.snap-preview{outline:2px dashed var(--accent);outline-offset:2px;}
+.th{padding:8px 10px;border-radius:9px 9px 0 0;font-family:'Syne',sans-serif;font-size:12px;font-weight:700;display:flex;align-items:center;gap:5px;}
+.mt{font-size:9px;font-family:'JetBrains Mono',monospace;font-weight:400;opacity:.65;margin-left:auto;padding:1px 4px;border-radius:3px;background:rgba(255,255,255,.08);}
+.cb{background:none;border:none;color:inherit;cursor:pointer;font-size:10px;opacity:.55;padding:0 1px;flex-shrink:0;}
+.cb:hover{opacity:1;}
+.tb-body{padding:4px 0 6px;}
+.fr{display:flex;align-items:center;padding:2px 10px;font-size:11px;gap:4px;transition:background .1s;}
+.fr:hover{background:rgba(255,255,255,.03);}
+.fb{font-size:9px;padding:1px 3px;border-radius:3px;font-weight:700;min-width:20px;text-align:center;}
+.pk{background:rgba(251,191,36,.15);color:var(--pk);}
+.fk{background:rgba(96,165,250,.15);color:var(--fk);}
+.em{min-width:20px;}
+.fn{color:var(--text);flex:1;}
+.ft{color:var(--muted);font-size:10px;}
+/* editable field */
+.fn-edit{background:none;border:none;border-bottom:1px solid var(--accent);color:var(--accent);font-family:'JetBrains Mono',monospace;font-size:11px;width:90px;outline:none;}
+.add-field-btn{width:100%;padding:3px 10px;background:none;border:none;border-top:1px dashed var(--border);color:var(--muted);font-size:10px;cursor:pointer;text-align:left;transition:color .15s;}
+.add-field-btn:hover{color:var(--accent);}
+/* Module header colors */
+.m1 .th{background:linear-gradient(135deg,#1a1f35,#0f1729);border-bottom:2px solid #6366f1;color:#818cf8;}
+.m2 .th{background:linear-gradient(135deg,#1a2535,#0f1f29);border-bottom:2px solid #00d4ff;color:#00d4ff;}
+.m3 .th{background:linear-gradient(135deg,#1a3520,#0f2918);border-bottom:2px solid #10b981;color:#10b981;}
+.m4 .th{background:linear-gradient(135deg,#35201a,#291808);border-bottom:2px solid #f59e0b;color:#f59e0b;}
+.m5 .th{background:linear-gradient(135deg,#351a1a,#290808);border-bottom:2px solid #ef4444;color:#ef4444;}
+.m6 .th{background:linear-gradient(135deg,#1a3035,#082025);border-bottom:2px solid #06b6d4;color:#06b6d4;}
+.m7 .th{background:linear-gradient(135deg,#2a1a35,#1a0829);border-bottom:2px solid #a855f7;color:#a855f7;}
+.m8 .th{background:linear-gradient(135deg,#352a1a,#291e08);border-bottom:2px solid #d97706;color:#d97706;}
+.m9 .th{background:linear-gradient(135deg,#1a3530,#083525);border-bottom:2px solid #14b8a6;color:#14b8a6;}
+.lt .m1 .th{background:linear-gradient(135deg,#eef,#f5f5ff);border-bottom:2px solid #6366f1;color:#4f46e5;}
+.lt .m2 .th{background:linear-gradient(135deg,#e0f7ff,#f0fbff);border-bottom:2px solid #0284c7;color:#0284c7;}
+.lt .m3 .th{background:linear-gradient(135deg,#d1fae5,#f0fff8);border-bottom:2px solid #059669;color:#059669;}
+.lt .m4 .th{background:linear-gradient(135deg,#fef3c7,#fffbeb);border-bottom:2px solid #d97706;color:#b45309;}
+.lt .m5 .th{background:linear-gradient(135deg,#fee2e2,#fff5f5);border-bottom:2px solid #dc2626;color:#b91c1c;}
+.lt .m6 .th{background:linear-gradient(135deg,#cffafe,#f0feff);border-bottom:2px solid #0891b2;color:#0e7490;}
+.lt .m7 .th{background:linear-gradient(135deg,#f3e8ff,#faf5ff);border-bottom:2px solid #9333ea;color:#7c3aed;}
+.lt .m8 .th{background:linear-gradient(135deg,#fde68a,#fffbeb);border-bottom:2px solid #d97706;color:#92400e;}
+.lt .m9 .th{background:linear-gradient(135deg,#ccfbf1,#f0fdf9);border-bottom:2px solid #0d9488;color:#0f766e;}
+/* connections */
+.cl{stroke-width:1.5;fill:none;opacity:.42;transition:opacity .2s,stroke-width .2s;}
+.cl.hi{opacity:1;stroke-width:2.5;}
+.cl.dm{opacity:.04;}
+
+/* ─── RIGHT PANEL ─── */
+#rp{position:fixed;top:48px;right:0;width:292px;background:var(--panel);border-left:1px solid var(--border);padding:13px;z-index:150;height:calc(100vh - 84px);overflow-y:auto;display:none;transform:translateX(100%);transition:transform .25s cubic-bezier(.4,0,.2,1);}
+#rp.open{display:block;transform:translateX(0);}
+#rp h3{font-family:'Syne',sans-serif;font-size:14px;font-weight:700;margin-bottom:10px;color:var(--accent);display:flex;align-items:center;justify-content:space-between;}
+.xb{background:none;border:none;color:var(--muted);cursor:pointer;font-size:17px;}
+.is{margin-bottom:11px;}
+.il{color:var(--muted);font-size:9px;text-transform:uppercase;letter-spacing:1px;margin-bottom:3px;}
+.iv{color:var(--text);line-height:1.65;font-size:11px;}
+.rc{display:inline-block;padding:2px 5px;border-radius:3px;margin:2px;font-size:10px;border:1px solid;cursor:pointer;}
+.sqp{background:var(--bg);border:1px solid var(--border);border-radius:5px;padding:7px;font-size:10px;color:#86efac;line-height:1.8;white-space:pre-wrap;overflow:auto;max-height:150px;}
+/* stat badges */
+.stat-badge{display:inline-flex;align-items:center;gap:4px;padding:3px 7px;border-radius:4px;font-size:10px;margin:2px;border:1px solid;}
+
+/* ─── MODALS ─── */
+.modal-bg{position:fixed;inset:0;background:rgba(0,0,0,.72);z-index:500;display:none;align-items:center;justify-content:center;backdrop-filter:blur(4px);}
+.modal-bg.open{display:flex;}
+.modal{background:var(--surface);border:1px solid var(--border);border-radius:13px;box-shadow:0 24px 80px rgba(0,0,0,.7);}
+/* SQL modal */
+#sql-m{width:min(700px,95vw);max-height:85vh;display:flex;flex-direction:column;}
+#sql-hd{padding:12px 16px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;font-family:'Syne',sans-serif;font-weight:700;font-size:14px;color:var(--accent);}
+#sql-tabs{display:flex;gap:2px;padding:8px 12px 0;border-bottom:1px solid var(--border);overflow-x:auto;}
+.stab{padding:4px 11px;border-radius:5px 5px 0 0;font-size:10px;cursor:pointer;background:none;border:1px solid transparent;color:var(--muted);transition:all .15s;font-family:'JetBrains Mono',monospace;white-space:nowrap;}
+.stab.on{background:var(--panel);border-color:var(--border);border-bottom-color:var(--panel);color:var(--text);}
+#sql-body{padding:12px;overflow-y:auto;flex:1;}
+#sql-pre{background:var(--panel);padding:12px;border-radius:7px;font-size:11px;line-height:1.7;overflow-x:auto;white-space:pre-wrap;color:#86efac;border:1px solid var(--border);}
+#sql-ft{padding:10px 16px;border-top:1px solid var(--border);display:flex;gap:6px;justify-content:flex-end;}
+/* Analysis modal */
+#ana-m{width:min(760px,96vw);max-height:88vh;display:flex;flex-direction:column;}
+#ana-hd{padding:12px 16px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;font-family:'Syne',sans-serif;font-weight:700;font-size:14px;color:var(--accent);}
+#ana-tabs{display:flex;gap:2px;padding:8px 12px 0;border-bottom:1px solid var(--border);}
+.atab{padding:5px 12px;border-radius:5px 5px 0 0;font-size:11px;cursor:pointer;background:none;border:1px solid transparent;color:var(--muted);transition:all .15s;font-family:'JetBrains Mono',monospace;}
+.atab.on{background:var(--panel);border-color:var(--border);border-bottom-color:var(--panel);color:var(--text);}
+#ana-body{padding:16px;overflow-y:auto;flex:1;}
+/* Dict modal */
+#dict-m{width:min(820px,96vw);max-height:88vh;display:flex;flex-direction:column;}
+#dict-hd{padding:12px 16px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;font-family:'Syne',sans-serif;font-weight:700;font-size:14px;color:var(--accent);}
+#dict-body{padding:14px;overflow-y:auto;flex:1;}
+.dict-table{width:100%;border-collapse:collapse;font-size:11px;}
+.dict-table th{text-align:left;padding:6px 10px;border-bottom:2px solid var(--border);color:var(--muted);font-size:9px;text-transform:uppercase;letter-spacing:1px;}
+.dict-table td{padding:5px 10px;border-bottom:1px solid var(--border);vertical-align:top;}
+.dict-table td.editable{cursor:text;color:var(--text);}
+.dict-table td.editable:focus{outline:1px solid var(--accent);background:rgba(0,212,255,.05);}
+.dict-section{margin-bottom:20px;}
+.dict-section h4{font-family:'Syne',sans-serif;font-size:13px;font-weight:700;padding:8px 10px;border-radius:6px;margin-bottom:6px;}
+/* Context menu */
+#ctx{position:fixed;background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:5px;z-index:400;display:none;min-width:170px;box-shadow:0 8px 32px rgba(0,0,0,.5);font-size:11px;}
+.ctx-item{padding:6px 12px;border-radius:5px;cursor:pointer;display:flex;align-items:center;gap:7px;transition:background .1s;}
+.ctx-item:hover{background:var(--border);}
+.ctx-sep{height:1px;background:var(--border);margin:4px 0;}
+/* Lifecycle flow */
+.flow-step{display:flex;align-items:flex-start;gap:12px;margin-bottom:12px;}
+.flow-num{width:28px;height:28px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-family:'Syne',sans-serif;font-weight:800;font-size:12px;flex-shrink:0;}
+.flow-arrow{display:flex;align-items:center;justify-content:center;color:var(--muted);font-size:18px;padding:4px 0;}
+/* Diff view */
+.diff-row{display:flex;gap:10px;font-size:11px;padding:4px 0;border-bottom:1px solid var(--border);}
+.diff-a,.diff-b{flex:1;padding:4px 8px;border-radius:4px;}
+.diff-a{background:rgba(16,185,129,.08);}
+.diff-b{background:rgba(239,68,68,.08);}
+/* Table stats grid */
+.stats-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:10px;}
+.stats-card{background:var(--panel);border:1px solid var(--border);border-radius:8px;padding:10px 12px;}
+.stats-card h5{font-family:'Syne',sans-serif;font-size:12px;font-weight:700;margin-bottom:6px;}
+
+/* ─── BOTTOM BAR ─── */
+#sb{position:fixed;bottom:0;left:0;right:0;height:36px;background:rgba(10,13,20,.97);border-top:1px solid var(--border);display:flex;align-items:center;padding:0 12px;gap:16px;font-size:10px;color:var(--muted);z-index:100;}
+.lt #sb{background:rgba(240,244,248,.97);}
+.sv{color:var(--accent);font-weight:700;}
+#mm{position:fixed;bottom:44px;right:12px;width:155px;height:95px;background:rgba(13,17,32,.92);border:1px solid var(--border);border-radius:7px;z-index:100;overflow:hidden;}
+.lt #mm{background:rgba(228,234,244,.92);}
+#mmc{width:100%;height:100%;}
+#mmv{position:absolute;border:1.5px solid var(--accent);border-radius:2px;opacity:.65;pointer-events:none;}
+#zc{position:fixed;bottom:44px;right:180px;z-index:100;display:flex;flex-direction:column;gap:4px;}
+.zb{width:28px;height:28px;background:var(--surface);border:1px solid var(--border);border-radius:6px;color:var(--text);font-size:13px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .2s;}
+.zb:hover{border-color:var(--accent);color:var(--accent);}
+/* undo indicator */
+#undo-ind{position:fixed;top:56px;left:50%;transform:translateX(-50%);background:var(--surface);border:1px solid var(--border);border-radius:6px;padding:4px 12px;font-size:10px;z-index:300;display:none;color:var(--muted);}
+#undo-ind span{color:var(--accent);}
+/* toast */
+#toast{position:fixed;bottom:46px;left:50%;transform:translateX(-50%) translateY(16px);background:#1e293b;border:1px solid var(--accent);border-radius:7px;padding:6px 14px;font-size:11px;color:var(--text);z-index:600;opacity:0;transition:all .28s;pointer-events:none;white-space:nowrap;}
+#toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
+/* shortcuts overlay */
+#kbhelp{position:fixed;inset:0;background:rgba(0,0,0,.75);z-index:700;display:none;align-items:center;justify-content:center;}
+#kbhelp.open{display:flex;}
+#kbbox{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:22px 28px;min-width:380px;max-width:500px;}
+#kbbox h3{font-family:'Syne',sans-serif;font-size:16px;font-weight:800;color:var(--accent);margin-bottom:14px;}
+.kb-row{display:flex;justify-content:space-between;align-items:center;padding:5px 0;border-bottom:1px solid var(--border);font-size:12px;}
+.kb-row:last-child{border-bottom:none;}
+kbd{background:var(--border);padding:2px 7px;border-radius:4px;font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--text);}
+</style>
+</head>
+<body>
+
+<!-- HEADER -->
+<div id="hdr">
+  <div id="logo">⬡ LoanCore360<small>ER Diagram v3 · 20 Tables</small></div>
+  <div id="sw"><span id="si-ic">🔍</span><input id="si" placeholder="Search tables / fields…" autocomplete="off"><div id="sr"></div></div>
+  <div class="sep"></div>
+  <div id="mf">
+    <span style="font-size:9px;color:var(--muted)">Filter:</span>
+    <span class="mc on" style="color:#818cf8" data-m="1">IAM</span>
+    <span class="mc on" style="color:#00d4ff" data-m="2">APP</span>
+    <span class="mc on" style="color:#10b981" data-m="3">PRODUCT</span>
+    <span class="mc on" style="color:#f59e0b" data-m="4">CREDIT</span>
+    <span class="mc on" style="color:#ef4444" data-m="5">ACCOUNT</span>
+    <span class="mc on" style="color:#06b6d4" data-m="6">SERVICING</span>
+    <span class="mc on" style="color:#a855f7" data-m="7">COLLECTIONS</span>
+    <span class="mc on" style="color:#d97706" data-m="8">GL</span>
+    <span class="mc on" style="color:#14b8a6" data-m="9">ANALYTICS</span>
+  </div>
+  <div class="sep"></div>
+  <button class="tb" id="btn-lanes"><span class="i">🏊</span>Lanes</button>
+  <button class="tb" id="btn-col"><span class="i">⊟</span>Collapse</button>
+  <button class="tb" id="btn-exp"><span class="i">⊞</span>Expand</button>
+  <button class="tb" id="btn-lay"><span class="i">⊡</span>Layout</button>
+  <button class="tb" id="btn-sql"><span class="i">🗄</span>SQL</button>
+  <button class="tb" id="btn-png"><span class="i">🖼</span>Export</button>
+  <button class="tb" id="btn-ana"><span class="i">📊</span>Analysis</button>
+  <button class="tb" id="btn-dict"><span class="i">📖</span>Dictionary</button>
+  <button class="tb" id="btn-theme"><span class="i">☀</span>Theme</button>
+  <button class="tb" id="btn-kb"><span class="i">⌨</span>?</button>
+</div>
+
+<!-- CANVAS -->
+<div id="cw">
+  <div id="cv">
+    <div class="gb"></div>
+    <svg class="cn" id="svgl"></svg>
+  </div>
+</div>
+
+<!-- RIGHT PANEL -->
+<div id="rp"><h3 id="rp-title">Table Info <button class="xb" onclick="closePanel()">✕</button></h3><div id="rp-body"></div></div>
+
+<!-- CONTEXT MENU -->
+<div id="ctx">
+  <div class="ctx-item" id="ctx-inspect">🔍 Inspect Table</div>
+  <div class="ctx-item" id="ctx-collapse">⊟ Collapse / Expand</div>
+  <div class="ctx-item" id="ctx-trace">⇢ Set as Path Start</div>
+  <div class="ctx-item" id="ctx-center">🎯 Center on Screen</div>
+  <div class="ctx-sep"></div>
+  <div class="ctx-item" id="ctx-edit">✏ Edit Table Name</div>
+  <div class="ctx-item" id="ctx-addfield">＋ Add Field</div>
+  <div class="ctx-sep"></div>
+  <div class="ctx-item" id="ctx-sql">🗄 Copy CREATE SQL</div>
+  <div class="ctx-item" id="ctx-dict">📖 View in Dictionary</div>
+</div>
+
+<!-- SQL MODAL -->
+<div class="modal-bg" id="sql-bg">
+  <div class="modal" id="sql-m">
+    <div id="sql-hd">🗄 SQL Schema Export <button class="xb" onclick="closeModal('sql-bg')" style="font-size:18px">✕</button></div>
+    <div id="sql-tabs"></div>
+    <div id="sql-body"><pre id="sql-pre"></pre></div>
+    <div id="sql-ft">
+      <button class="tb" onclick="copySql()"><span class="i">📋</span>Copy</button>
+      <button class="tb" onclick="dlSql()"><span class="i">⬇</span>Download .sql</button>
+      <button class="tb" onclick="closeModal('sql-bg')">Close</button>
+    </div>
+  </div>
+</div>
+
+<!-- ANALYSIS MODAL -->
+<div class="modal-bg" id="ana-bg">
+  <div class="modal" id="ana-m">
+    <div id="ana-hd">📊 Schema Analysis <button class="xb" onclick="closeModal('ana-bg')" style="font-size:18px">✕</button></div>
+    <div id="ana-tabs">
+      <button class="atab on" onclick="setAnaTab(0,this)">📋 Table Stats</button>
+      <button class="atab" onclick="setAnaTab(1,this)">🔄 Lifecycle Flow</button>
+      <button class="atab" onclick="setAnaTab(2,this)">⚠ Detectors</button>
+      <button class="atab" onclick="setAnaTab(3,this)">⇄ Diff / Compare</button>
+    </div>
+    <div id="ana-body"></div>
+  </div>
+</div>
+
+<!-- DICTIONARY MODAL -->
+<div class="modal-bg" id="dict-bg">
+  <div class="modal" id="dict-m">
+    <div id="dict-hd">📖 Data Dictionary <button class="xb" onclick="closeModal('dict-bg')" style="font-size:18px">✕</button></div>
+    <div id="dict-body"></div>
+  </div>
+</div>
+
+<!-- MINIMAP -->
+<div id="mm"><canvas id="mmc" width="310" height="190"></canvas><div id="mmv"></div></div>
+<div id="zc"><button class="zb" id="zi">+</button><button class="zb" id="zo">−</button><button class="zb" id="zf" title="Fit">⊙</button></div>
+
+<!-- BOTTOM BAR -->
+<div id="sb">
+  <div>Tables: <span class="sv" id="st-t">20</span></div>
+  <div>Relations: <span class="sv" id="st-r">17</span></div>
+  <div>Visible: <span class="sv" id="st-v">20</span></div>
+  <div>Selected: <span class="sv" id="st-s">—</span></div>
+  <div style="margin-left:auto;display:flex;gap:14px;align-items:center">
+    <div style="display:flex;gap:8px;align-items:center;font-size:10px">
+      <svg width="28" height="11"><line x1="1" y1="5.5" x2="27" y2="5.5" stroke="#94a3b8" stroke-width="1.4"/><line x1="21" y1="1" x2="21" y2="10" stroke="#94a3b8" stroke-width="1.7"/><line x1="15" y1="1" x2="15" y2="10" stroke="#94a3b8" stroke-width="1.7"/></svg>Exactly 1
+      <svg width="28" height="11"><line x1="1" y1="5.5" x2="27" y2="5.5" stroke="#94a3b8" stroke-width="1.4"/><line x1="22" y1="1" x2="22" y2="10" stroke="#94a3b8" stroke-width="1.7"/><circle cx="12" cy="5.5" r="3.5" fill="none" stroke="#94a3b8" stroke-width="1.4"/></svg>0 or 1
+      <svg width="30" height="11"><line x1="1" y1="5.5" x2="29" y2="5.5" stroke="#94a3b8" stroke-width="1.4"/><line x1="25" y1="1" x2="25" y2="10" stroke="#94a3b8" stroke-width="1.7"/><line x1="25" y1="5.5" x2="14" y2="1" stroke="#94a3b8" stroke-width="1.4"/><line x1="25" y1="5.5" x2="14" y2="10" stroke="#94a3b8" stroke-width="1.4"/></svg>1 or Many
+      <svg width="30" height="11"><line x1="1" y1="5.5" x2="29" y2="5.5" stroke="#94a3b8" stroke-width="1.4"/><circle cx="22" cy="5.5" r="3.5" fill="none" stroke="#94a3b8" stroke-width="1.4"/><line x1="16" y1="5.5" x2="5" y2="1" stroke="#94a3b8" stroke-width="1.4"/><line x1="16" y1="5.5" x2="5" y2="10" stroke="#94a3b8" stroke-width="1.4"/></svg>0 or Many
+    </div>
+    <div>Zoom: <span class="sv" id="st-z">72%</span></div>
+    <span style="color:var(--muted)">💡 Click=inspect · Shift+Click=trace · RClick=menu · Ctrl+Z=undo</span>
+  </div>
+</div>
+
+<!-- UNDO INDICATOR -->
+<div id="undo-ind">Undo: moved <span id="undo-tbl">—</span></div>
+
+<!-- TOAST -->
+<div id="toast"></div>
+
+<!-- KEYBOARD HELP -->
+<div id="kbhelp">
+  <div id="kbbox">
+    <h3>⌨ Keyboard Shortcuts</h3>
+    <div class="kb-row"><span>Search</span><kbd>Ctrl + F</kbd></div>
+    <div class="kb-row"><span>Close panel / clear</span><kbd>Escape</kbd></div>
+    <div class="kb-row"><span>Undo last move</span><kbd>Ctrl + Z</kbd></div>
+    <div class="kb-row"><span>Redo</span><kbd>Ctrl + Y</kbd></div>
+    <div class="kb-row"><span>Fit all tables to screen</span><kbd>Ctrl + Shift + F</kbd></div>
+    <div class="kb-row"><span>Toggle swim lanes</span><kbd>L</kbd></div>
+    <div class="kb-row"><span>Toggle collapse all</span><kbd>C</kbd></div>
+    <div class="kb-row"><span>Open SQL export</span><kbd>S</kbd></div>
+    <div class="kb-row"><span>Open Analysis</span><kbd>A</kbd></div>
+    <div class="kb-row"><span>Open Dictionary</span><kbd>D</kbd></div>
+    <div class="kb-row"><span>Toggle theme</span><kbd>T</kbd></div>
+    <div class="kb-row"><span>Pan canvas</span><kbd>Arrow Keys</kbd></div>
+    <div class="kb-row"><span>Zoom in / out</span><kbd>+ / −</kbd></div>
+    <div class="kb-row"><span>Path tracer start</span><kbd>Shift + Click table</kbd></div>
+    <div class="kb-row"><span>Context menu</span><kbd>Right Click table</kbd></div>
+    <div class="kb-row" style="border:none"><span>This help</span><kbd>?</kbd></div>
+    <div style="margin-top:12px;text-align:right"><button class="tb" onclick="closeKb()">Close</button></div>
+  </div>
+</div>
+
+<script>
+// ═══════════════════ DATA ═══════════════════
+const MM={
+  1:{name:'Identity & Access',color:'#6366f1',tag:'IAM'},
+  2:{name:'Customer & Application',color:'#00d4ff',tag:'APP'},
+  3:{name:'Loan Product Config',color:'#10b981',tag:'PRODUCT'},
+  4:{name:'Credit Appraisal',color:'#f59e0b',tag:'CREDIT'},
+  5:{name:'Account & Disbursement',color:'#ef4444',tag:'ACCOUNT'},
+  6:{name:'Loan Servicing',color:'#06b6d4',tag:'SERVICING'},
+  7:{name:'Collections & NPA',color:'#a855f7',tag:'COLLECTIONS'},
+  8:{name:'GL & Integration',color:'#d97706',tag:'GL'},
+  9:{name:'Analytics & Alerts',color:'#14b8a6',tag:'ANALYTICS'},
+};
+
+const FIELD_DESCS={
+  'User.UserID':'Auto-increment primary key for user identity.',
+  'User.Name':'Full name of the user.',
+  'User.Role':'Functional role: Customer, BranchOfficer, Approver, Operations, Collections, Admin.',
+  'User.Email':'Unique email address used for login and notifications.',
+  'User.Phone':'Contact phone number.',
+  'AuditLog.AuditID':'Primary key for the audit record.',
+  'AuditLog.UserID':'FK to User — who performed the action.',
+  'AuditLog.Action':'Description of the action performed (e.g. LOGIN, UPDATE, DELETE).',
+  'AuditLog.Resource':'The entity or endpoint that was affected.',
+  'AuditLog.Timestamp':'Exact datetime the action was performed.',
+  'AuditLog.Metadata':'JSON payload with extra context (IP, old/new values, etc.).',
+  'Customer.CustomerID':'Primary key for borrower identity.',
+  'Customer.Name':'Full legal name of the customer.',
+  'Customer.DOB':'Date of birth used for age eligibility checks.',
+  'Customer.ContactInfo':'JSON object: address, email, phone.',
+  'Customer.KYCStatus':'Know Your Customer status: Pending, Verified, Rejected.',
+  'Customer.Segment':'Retail or Corporate borrower classification.',
+  'Customer.Status':'Active or Inactive account status.',
+  'LoanApplication.ApplicationID':'Primary key for the loan application.',
+  'LoanApplication.CustomerID':'FK to Customer — the applicant.',
+  'LoanApplication.ProductID':'FK to LoanProduct — product applied for.',
+  'LoanApplication.RequestedAmount':'Amount the customer is requesting.',
+  'LoanApplication.TenureMonths':'Requested repayment period in months.',
+  'LoanApplication.ApplicationDate':'Date the application was submitted.',
+  'LoanApplication.Status':'Lifecycle: Draft, Submitted, UnderReview, Approved, Rejected.',
+  'LoanDocument.DocumentID':'Primary key for each uploaded document.',
+  'LoanDocument.ApplicationID':'FK to LoanApplication.',
+  'LoanDocument.DocumentType':'Type: AadhaarCard, PAN, Payslip, BankStatement, etc.',
+  'LoanDocument.FileURI':'Cloud storage URI pointing to the actual file.',
+  'LoanDocument.UploadedDate':'Date the document was uploaded.',
+  'LoanDocument.VerificationStatus':'Pending, Verified, or Rejected.',
+  'LoanProduct.ProductID':'Primary key for the product template.',
+  'LoanProduct.Name':'Friendly product name (e.g. "Home Loan Premium").',
+  'LoanProduct.Category':'TermLoan, OD (Overdraft), CC (Cash Credit), Mortgage.',
+  'LoanProduct.MinAmount':'Minimum eligible loan amount for this product.',
+  'LoanProduct.MaxAmount':'Maximum eligible loan amount for this product.',
+  'LoanProduct.MinTenure':'Minimum tenure in months.',
+  'LoanProduct.MaxTenure':'Maximum tenure in months.',
+  'LoanProduct.InterestMethod':'Flat (fixed on principal) or Reducing (on outstanding balance).',
+  'LoanProduct.Status':'Active or Inactive product flag.',
+  'InterestRule.RuleID':'Primary key for the interest rate rule.',
+  'InterestRule.ProductID':'FK to LoanProduct.',
+  'InterestRule.Rate':'Annual interest rate as a percentage.',
+  'InterestRule.EffectiveFrom':'Date from which this rate is applicable.',
+  'InterestRule.EffectiveTo':'Date until which this rate is applicable. NULL = current.',
+  'ChargeRule.ChargeID':'Primary key for the charge rule.',
+  'ChargeRule.ProductID':'FK to LoanProduct.',
+  'ChargeRule.ChargeType':'Processing fee, Prepayment penalty, or Penal interest.',
+  'ChargeRule.Amount':'Value of the charge.',
+  'ChargeRule.Mode':'Flat (fixed amount) or Percent (% of principal).',
+  'CreditAppraisal.AppraisalID':'Primary key for the appraisal record.',
+  'CreditAppraisal.ApplicationID':'FK to LoanApplication.',
+  'CreditAppraisal.AnalystID':'FK to User (the credit analyst).',
+  'CreditAppraisal.Score':'Credit risk score (e.g. 300–900).',
+  'CreditAppraisal.Remarks':'Analyst notes on risk assessment.',
+  'CreditAppraisal.AppraisedDate':'Date the appraisal was completed.',
+  'ApprovalStage.StageID':'Primary key for each approval step.',
+  'ApprovalStage.ApplicationID':'FK to LoanApplication.',
+  'ApprovalStage.ApproverID':'FK to User (the approver at this stage).',
+  'ApprovalStage.StageName':'e.g. BranchManager, RegionalHead, CreditCommittee.',
+  'ApprovalStage.Decision':'Approve, Reject, or Return for revision.',
+  'ApprovalStage.DecisionDate':'Date the decision was made.',
+  'ApprovalStage.Notes':'Optional notes explaining the decision.',
+  'LoanAccount.LoanAccountID':'Primary key for the live loan account.',
+  'LoanAccount.ApplicationID':'FK to LoanApplication — links back to the origination.',
+  'LoanAccount.LoanNumber':'Human-readable account reference (e.g. LN2024001234).',
+  'LoanAccount.SanctionedAmount':'Actual approved amount (may differ from requested).',
+  'LoanAccount.InterestRate':'Rate applied at the time of account creation.',
+  'LoanAccount.TenureMonths':'Agreed repayment tenure.',
+  'LoanAccount.EMIAmount':'Monthly instalment amount.',
+  'LoanAccount.StartDate':'Date the loan account was opened.',
+  'LoanAccount.Status':'Active, Closed, or NPA (Non-Performing Asset).',
+  'Disbursement.DisbursementID':'Primary key for the disbursement event.',
+  'Disbursement.LoanAccountID':'FK to LoanAccount.',
+  'Disbursement.Amount':'Amount disbursed in this event.',
+  'Disbursement.DisbursementDate':'Date the funds were released.',
+  'Disbursement.Mode':'Transfer mode: NEFT, RTGS, or Account Transfer.',
+  'Disbursement.Status':'Initiated, Posted (successful), or Failed.',
+  'RepaymentSchedule.ScheduleID':'Primary key for each scheduled EMI row.',
+  'RepaymentSchedule.LoanAccountID':'FK to LoanAccount.',
+  'RepaymentSchedule.InstallmentNo':'Sequential EMI number (1, 2, 3…).',
+  'RepaymentSchedule.DueDate':'Date this instalment is due.',
+  'RepaymentSchedule.PrincipalDue':'Principal component of this EMI.',
+  'RepaymentSchedule.InterestDue':'Interest component of this EMI.',
+  'RepaymentSchedule.TotalDue':'Sum of principal + interest due.',
+  'RepaymentSchedule.Status':'Due, Paid, or Overdue.',
+  'Repayment.RepaymentID':'Primary key for each payment transaction.',
+  'Repayment.LoanAccountID':'FK to LoanAccount.',
+  'Repayment.PaidDate':'Date the payment was received.',
+  'Repayment.Amount':'Amount paid.',
+  'Repayment.Mode':'Payment mode: UPI, NEFT, Cheque, Cash, etc.',
+  'Repayment.Component':'What was paid: Principal, Interest, or Charges.',
+  'Repayment.Status':'Success or Failed.',
+  'InterestAccrual.AccrualID':'Primary key for the accrual entry.',
+  'InterestAccrual.LoanAccountID':'FK to LoanAccount.',
+  'InterestAccrual.PeriodStart':'Start date of the accrual period.',
+  'InterestAccrual.PeriodEnd':'End date of the accrual period.',
+  'InterestAccrual.InterestAmount':'Interest amount accrued in this period.',
+  'InterestAccrual.PostedDate':'Date this accrual was posted to the ledger.',
+  'DelinquencyRecord.DelinquencyID':'Primary key for the delinquency record.',
+  'DelinquencyRecord.LoanAccountID':'FK to LoanAccount.',
+  'DelinquencyRecord.DaysPastDue':'Number of calendar days overdue.',
+  'DelinquencyRecord.Bucket':'DPD classification: 0-30, 31-60, 61-90, 90+.',
+  'DelinquencyRecord.Status':'Active (still overdue) or Resolved.',
+  'CollectionAction.ActionID':'Primary key for the collection action log.',
+  'CollectionAction.LoanAccountID':'FK to LoanAccount.',
+  'CollectionAction.ActionType':'Call, FieldVisit, Email, or LegalNotice.',
+  'CollectionAction.Notes':'Free-text notes from the collections officer.',
+  'CollectionAction.ActionDate':'Date the action was taken.',
+  'LedgerEntry.EntryID':'Primary key for the ledger posting.',
+  'LedgerEntry.LoanAccountID':'FK to LoanAccount.',
+  'LedgerEntry.EntryType':'Debit or Credit.',
+  'LedgerEntry.Amount':'Amount of the posting.',
+  'LedgerEntry.EntryDate':'Date of the ledger entry.',
+  'LedgerEntry.Narrative':'Description of the entry (e.g. "EMI Receipt", "Disbursement").',
+  'LoanReport.ReportID':'Primary key for the report snapshot.',
+  'LoanReport.Scope':'Branch, Product, or Period scope filter.',
+  'LoanReport.Metrics':'JSON blob of KPI values (PAR, NPA%, disbursed amount, etc.).',
+  'LoanReport.GeneratedDate':'Date the report was generated.',
+  'Notification.NotificationID':'Primary key for the notification.',
+  'Notification.UserID':'FK to User — recipient.',
+  'Notification.Message':'Notification message text.',
+  'Notification.Category':'EMI reminder, Approval update, or Delinquency alert.',
+  'Notification.Status':'Unread or Read.',
+  'Notification.CreatedDate':'Timestamp when the notification was created.',
+};
+
+const TABLES=[
+  {id:'User',module:1,x:60,y:80,desc:'All system users with role-based access. Central to authentication across all modules.',
+   fields:[{name:'UserID',pk:true,type:'INT'},{name:'Name',type:'VARCHAR'},{name:'Role',type:'ENUM'},{name:'Email',type:'VARCHAR'},{name:'Phone',type:'VARCHAR'}]},
+  {id:'AuditLog',module:1,x:326,y:80,desc:'Tracks every user action for security compliance and regulatory audit trails.',
+   fields:[{name:'AuditID',pk:true,type:'INT'},{name:'UserID',fk:true,type:'INT'},{name:'Action',type:'VARCHAR'},{name:'Resource',type:'VARCHAR'},{name:'Timestamp',type:'DATETIME'},{name:'Metadata',type:'JSON'}]},
+  {id:'Customer',module:2,x:60,y:376,desc:'Master record for all borrowers — retail and corporate. Stores KYC status.',
+   fields:[{name:'CustomerID',pk:true,type:'INT'},{name:'Name',type:'VARCHAR'},{name:'DOB',type:'DATE'},{name:'ContactInfo',type:'JSON'},{name:'KYCStatus',type:'ENUM'},{name:'Segment',type:'ENUM'},{name:'Status',type:'ENUM'}]},
+  {id:'LoanApplication',module:2,x:326,y:328,desc:'Core application record. Lifecycle: Draft→Submitted→Approved/Rejected.',
+   fields:[{name:'ApplicationID',pk:true,type:'INT'},{name:'CustomerID',fk:true,type:'INT'},{name:'ProductID',fk:true,type:'INT'},{name:'RequestedAmount',type:'DECIMAL'},{name:'TenureMonths',type:'INT'},{name:'ApplicationDate',type:'DATE'},{name:'Status',type:'ENUM'}]},
+  {id:'LoanDocument',module:2,x:60,y:640,desc:'File URI references for KYC, income, and collateral documents per application.',
+   fields:[{name:'DocumentID',pk:true,type:'INT'},{name:'ApplicationID',fk:true,type:'INT'},{name:'DocumentType',type:'VARCHAR'},{name:'FileURI',type:'TEXT'},{name:'UploadedDate',type:'DATE'},{name:'VerificationStatus',type:'ENUM'}]},
+  {id:'LoanProduct',module:3,x:616,y:80,desc:'Loan product templates: type, amount limits, tenure range and interest method.',
+   fields:[{name:'ProductID',pk:true,type:'INT'},{name:'Name',type:'VARCHAR'},{name:'Category',type:'ENUM'},{name:'MinAmount',type:'DECIMAL'},{name:'MaxAmount',type:'DECIMAL'},{name:'MinTenure',type:'INT'},{name:'MaxTenure',type:'INT'},{name:'InterestMethod',type:'ENUM'},{name:'Status',type:'ENUM'}]},
+  {id:'InterestRule',module:3,x:890,y:60,desc:'Time-bound interest rates per product. Supports rate changes via EffectiveFrom/To.',
+   fields:[{name:'RuleID',pk:true,type:'INT'},{name:'ProductID',fk:true,type:'INT'},{name:'Rate',type:'DECIMAL'},{name:'EffectiveFrom',type:'DATE'},{name:'EffectiveTo',type:'DATE'}]},
+  {id:'ChargeRule',module:3,x:890,y:276,desc:'Fee rules: processing, prepayment, penal charges in flat or percentage mode.',
+   fields:[{name:'ChargeID',pk:true,type:'INT'},{name:'ProductID',fk:true,type:'INT'},{name:'ChargeType',type:'ENUM'},{name:'Amount',type:'DECIMAL'},{name:'Mode',type:'ENUM'}]},
+  {id:'CreditAppraisal',module:4,x:326,y:568,desc:"Analyst's risk assessment: credit score and remarks for a loan application.",
+   fields:[{name:'AppraisalID',pk:true,type:'INT'},{name:'ApplicationID',fk:true,type:'INT'},{name:'AnalystID',fk:true,type:'INT'},{name:'Score',type:'DECIMAL'},{name:'Remarks',type:'TEXT'},{name:'AppraisedDate',type:'DATE'}]},
+  {id:'ApprovalStage',module:4,x:578,y:540,desc:'Multi-level approval workflow. Each row = one approver decision per application.',
+   fields:[{name:'StageID',pk:true,type:'INT'},{name:'ApplicationID',fk:true,type:'INT'},{name:'ApproverID',fk:true,type:'INT'},{name:'StageName',type:'VARCHAR'},{name:'Decision',type:'ENUM'},{name:'DecisionDate',type:'DATE'},{name:'Notes',type:'TEXT'}]},
+  {id:'LoanAccount',module:5,x:616,y:748,desc:'Live loan account post-approval. Holds sanctioned amount, EMI, and account status.',
+   fields:[{name:'LoanAccountID',pk:true,type:'INT'},{name:'ApplicationID',fk:true,type:'INT'},{name:'LoanNumber',type:'VARCHAR'},{name:'SanctionedAmount',type:'DECIMAL'},{name:'InterestRate',type:'DECIMAL'},{name:'TenureMonths',type:'INT'},{name:'EMIAmount',type:'DECIMAL'},{name:'StartDate',type:'DATE'},{name:'Status',type:'ENUM'}]},
+  {id:'Disbursement',module:5,x:890,y:500,desc:'Disbursement events: amount, date, mode (NEFT/RTGS), and posting status.',
+   fields:[{name:'DisbursementID',pk:true,type:'INT'},{name:'LoanAccountID',fk:true,type:'INT'},{name:'Amount',type:'DECIMAL'},{name:'DisbursementDate',type:'DATE'},{name:'Mode',type:'ENUM'},{name:'Status',type:'ENUM'}]},
+  {id:'RepaymentSchedule',module:6,x:1160,y:688,desc:'Auto-generated EMI schedule. Each row = one installment with principal/interest split.',
+   fields:[{name:'ScheduleID',pk:true,type:'INT'},{name:'LoanAccountID',fk:true,type:'INT'},{name:'InstallmentNo',type:'INT'},{name:'DueDate',type:'DATE'},{name:'PrincipalDue',type:'DECIMAL'},{name:'InterestDue',type:'DECIMAL'},{name:'TotalDue',type:'DECIMAL'},{name:'Status',type:'ENUM'}]},
+  {id:'Repayment',module:6,x:1160,y:478,desc:'Actual payment transactions by borrowers with component breakdown.',
+   fields:[{name:'RepaymentID',pk:true,type:'INT'},{name:'LoanAccountID',fk:true,type:'INT'},{name:'PaidDate',type:'DATE'},{name:'Amount',type:'DECIMAL'},{name:'Mode',type:'VARCHAR'},{name:'Component',type:'ENUM'},{name:'Status',type:'ENUM'}]},
+  {id:'InterestAccrual',module:6,x:1160,y:278,desc:'Periodic interest accrual records for accounting and income recognition.',
+   fields:[{name:'AccrualID',pk:true,type:'INT'},{name:'LoanAccountID',fk:true,type:'INT'},{name:'PeriodStart',type:'DATE'},{name:'PeriodEnd',type:'DATE'},{name:'InterestAmount',type:'DECIMAL'},{name:'PostedDate',type:'DATE'}]},
+  {id:'DelinquencyRecord',module:7,x:890,y:960,desc:'Overdue tracking with DPD and bucket classification (0-30/31-60/61-90/90+).',
+   fields:[{name:'DelinquencyID',pk:true,type:'INT'},{name:'LoanAccountID',fk:true,type:'INT'},{name:'DaysPastDue',type:'INT'},{name:'Bucket',type:'ENUM'},{name:'Status',type:'ENUM'}]},
+  {id:'CollectionAction',module:7,x:616,y:1000,desc:'Recovery actions: calls, visits, legal notices on delinquent accounts.',
+   fields:[{name:'ActionID',pk:true,type:'INT'},{name:'LoanAccountID',fk:true,type:'INT'},{name:'ActionType',type:'ENUM'},{name:'Notes',type:'TEXT'},{name:'ActionDate',type:'DATE'}]},
+  {id:'LedgerEntry',module:8,x:1160,y:80,desc:'Internal double-entry ledger for disbursements, repayments, charges.',
+   fields:[{name:'EntryID',pk:true,type:'INT'},{name:'LoanAccountID',fk:true,type:'INT'},{name:'EntryType',type:'ENUM'},{name:'Amount',type:'DECIMAL'},{name:'EntryDate',type:'DATE'},{name:'Narrative',type:'TEXT'}]},
+  {id:'LoanReport',module:9,x:60,y:878,desc:'Analytics snapshots: portfolio KPIs, PAR ratios, NPA rates, performance metrics.',
+   fields:[{name:'ReportID',pk:true,type:'INT'},{name:'Scope',type:'VARCHAR'},{name:'Metrics',type:'JSON'},{name:'GeneratedDate',type:'DATE'}]},
+  {id:'Notification',module:9,x:326,y:840,desc:'In-app notifications: EMI reminders, overdue alerts, approval updates.',
+   fields:[{name:'NotificationID',pk:true,type:'INT'},{name:'UserID',fk:true,type:'INT'},{name:'Message',type:'TEXT'},{name:'Category',type:'ENUM'},{name:'Status',type:'ENUM'},{name:'CreatedDate',type:'DATETIME'}]},
+];
+
+const CONNS=[
+  {from:'AuditLog',to:'User',color:'#6366f1',fromCard:'many',toCard:'one',card:'1:N',label:'generates'},
+  {from:'Notification',to:'User',color:'#6366f1',fromCard:'many',toCard:'one',card:'1:N',label:'receives'},
+  {from:'LoanApplication',to:'Customer',color:'#00d4ff',fromCard:'many',toCard:'one',card:'1:N',label:'submits'},
+  {from:'LoanApplication',to:'LoanProduct',color:'#10b981',fromCard:'many',toCard:'one',card:'1:N',label:'uses'},
+  {from:'LoanDocument',to:'LoanApplication',color:'#00d4ff',fromCard:'many',toCard:'one',card:'1:N',label:'has docs'},
+  {from:'InterestRule',to:'LoanProduct',color:'#10b981',fromCard:'many',toCard:'one',card:'1:N',label:'rate'},
+  {from:'ChargeRule',to:'LoanProduct',color:'#10b981',fromCard:'many',toCard:'one',card:'1:N',label:'fee'},
+  {from:'CreditAppraisal',to:'LoanApplication',color:'#f59e0b',fromCard:'many-opt',toCard:'one',card:'1:0..N',label:'appraisal'},
+  {from:'ApprovalStage',to:'LoanApplication',color:'#f59e0b',fromCard:'many',toCard:'one',card:'1:N',label:'approval'},
+  {from:'LoanAccount',to:'LoanApplication',color:'#ef4444',fromCard:'one-opt',toCard:'one',card:'1:0..1',label:'creates'},
+  {from:'Disbursement',to:'LoanAccount',color:'#ef4444',fromCard:'many-opt',toCard:'one',card:'1:0..N',label:'disburse'},
+  {from:'RepaymentSchedule',to:'LoanAccount',color:'#06b6d4',fromCard:'many',toCard:'one',card:'1:N',label:'schedule'},
+  {from:'Repayment',to:'LoanAccount',color:'#06b6d4',fromCard:'many-opt',toCard:'one',card:'1:0..N',label:'repay'},
+  {from:'InterestAccrual',to:'LoanAccount',color:'#06b6d4',fromCard:'many',toCard:'one',card:'1:N',label:'accrual'},
+  {from:'LedgerEntry',to:'LoanAccount',color:'#d97706',fromCard:'many',toCard:'one',card:'1:N',label:'GL'},
+  {from:'DelinquencyRecord',to:'LoanAccount',color:'#a855f7',fromCard:'many-opt',toCard:'one',card:'1:0..N',label:'DPD'},
+  {from:'CollectionAction',to:'LoanAccount',color:'#a855f7',fromCard:'many-opt',toCard:'one',card:'1:0..N',label:'action'},
+];
+
+// BFS graph
+const G={};TABLES.forEach(t=>G[t.id]=new Set());
+CONNS.forEach(c=>{G[c.from].add(c.to);G[c.to].add(c.from);});
+
+// ═══════════════════ STATE ═══════════════════
+let sc=0.72,px=20,py=20,panning=false,psx,psy,ppx,ppy;
+let activeTbl=null,traceStart=null,showLanes=false,snapGrid=false;
+let ctxTarget=null,sqlTxt='';
+let activeM=new Set([1,2,3,4,5,6,7,8,9]);
+// Undo/redo stacks — store {id,x,y} snapshots
+const undoStack=[],redoStack=[];
+const ELS={};
+const cv=document.getElementById('cv'),svgl=document.getElementById('svgl'),cw=document.getElementById('cw');
+
+// ═══════════════════ BUILD CARDS ═══════════════════
+TABLES.forEach(t=>{
+  const div=document.createElement('div');
+  div.className=`tc m${t.module}`;div.id=`tc-${t.id}`;
+  div.style.left=t.x+'px';div.style.top=t.y+'px';div.dataset.m=t.module;
+  const fields=()=>t.fields.map(f=>`<div class="fr">${f.pk?'<span class="fb pk">PK</span>':f.fk?'<span class="fb fk">FK</span>':'<span class="em"></span>'}<span class="fn">${f.name}</span><span class="ft">${f.type}</span></div>`).join('');
+  const render=()=>{div.querySelector('.tb-body').innerHTML=fields()+`<button class="add-field-btn" data-id="${t.id}">＋ add field</button>`;};
+  div.innerHTML=`<div class="th"><span>⬡</span><span class="tname" data-id="${t.id}">${t.id}</span><span class="mt">${MM[t.module].tag}</span><button class="cb">▾</button></div><div class="tb-body"></div>`;
+  render();
+  // collapse
+  div.querySelector('.cb').onclick=e=>{e.stopPropagation();div.classList.toggle('col');div.querySelector('.cb').textContent=div.classList.contains('col')?'▸':'▾';setTimeout(()=>{drawConns();updMM();},40);};
+  // add field
+  div.addEventListener('click',e=>{
+    if(e.target.classList.contains('add-field-btn')){
+      e.stopPropagation();
+      const name=prompt('Field name:');if(!name)return;
+      const type=prompt('Field type (INT/VARCHAR/DECIMAL/DATE/TEXT/ENUM/JSON):','VARCHAR')||'VARCHAR';
+      t.fields.push({name,type});render();setTimeout(()=>{drawConns();updMM();},40);
+      toast('✓ Field added: '+name);return;
+    }
+    if(e.target.classList.contains('tname')){
+      e.stopPropagation();startEditName(t,e.target);return;
+    }
+    if(dragMoved)return;
+    if(e.shiftKey){tracePathFrom(t.id);return;}
+    selectTable(t);
+  });
+  // right-click
+  div.addEventListener('contextmenu',e=>{e.preventDefault();e.stopPropagation();ctxTarget=t;showCtx(e.clientX,e.clientY);});
+  // drag with undo
+  let dragMoved=false,sx,sy,sl,st2,preDragX,preDragY;
+  div.addEventListener('mousedown',e=>{
+    if(e.button!==0||e.target.classList.contains('cb')||e.target.classList.contains('tname')||e.target.classList.contains('add-field-btn'))return;
+    e.preventDefault();
+    sx=e.clientX;sy=e.clientY;sl=parseInt(div.style.left);st2=parseInt(div.style.top);
+    preDragX=t.x;preDragY=t.y;dragMoved=false;
+    const mv=e2=>{
+      let dx=(e2.clientX-sx)/sc,dy=(e2.clientY-sy)/sc;
+      if(Math.abs(dx)>3||Math.abs(dy)>3)dragMoved=true;
+      if(!dragMoved)return;
+      let nx=sl+dx,ny=st2+dy;
+      if(snapGrid){nx=Math.round(nx/40)*40;ny=Math.round(ny/40)*40;div.classList.add('snap-preview');}
+      else div.classList.remove('snap-preview');
+      div.style.left=nx+'px';div.style.top=ny+'px';t.x=nx;t.y=ny;
+      drawConns();updMM();
+    };
+    const up=()=>{
+      document.removeEventListener('mousemove',mv);document.removeEventListener('mouseup',up);
+      div.classList.remove('snap-preview');
+      if(dragMoved){undoStack.push({id:t.id,x:preDragX,y:preDragY});redoStack.length=0;showUndoInd(t.id);}
+      setTimeout(()=>dragMoved=false,10);
+    };
+    document.addEventListener('mousemove',mv);document.addEventListener('mouseup',up);
+  });
+  cv.appendChild(div);ELS[t.id]=div;
+});
+
+// ═══════════════════ EDIT TABLE NAME ═══════════════════
+function startEditName(t,span){
+  const old=t.id;const input=document.createElement('input');
+  input.className='fn-edit';input.value=old;
+  span.replaceWith(input);input.focus();input.select();
+  const done=()=>{
+    const nv=input.value.trim()||old;
+    if(nv!==old){t.id=nv;ELS[nv]=ELS[old];delete ELS[old];ELS[nv].id=`tc-${nv}`;ELS[nv].querySelector('[data-id="'+old+'"]')&&(ELS[nv].querySelector('[data-id="'+old+'"]').dataset.id=nv);ELS[nv].querySelector('.add-field-btn').dataset.id=nv;CONNS.forEach(c=>{if(c.from===old)c.from=nv;if(c.to===old)c.to=nv;});G[nv]=G[old];delete G[old];toast('Renamed: '+old+' → '+nv);}
+    const s2=document.createElement('span');s2.className='tname';s2.dataset.id=nv;s2.textContent=nv;input.replaceWith(s2);drawConns();
+  };
+  input.addEventListener('blur',done);input.addEventListener('keydown',e=>{if(e.key==='Enter')done();if(e.key==='Escape'){input.value=old;done();}});
+}
+
+// ═══════════════════ SELECT / HIGHLIGHT ═══════════════════
+function selectTable(t){
+  clearHL();
+  if(activeTbl===t.id){activeTbl=null;closePanel();updStats();return;}
+  activeTbl=t.id;ELS[t.id].classList.add('act');
+  document.querySelectorAll('.cl').forEach(el=>{(el.dataset.from===t.id||el.dataset.to===t.id)?el.classList.add('hi'):el.classList.add('dm');});
+  TABLES.forEach(x=>{if(x.id!==t.id&&!isConn(t.id,x.id))ELS[x.id].classList.add('dim');});
+  showPanel(t);updStats();
+}
+function isConn(a,b){return CONNS.some(c=>(c.from===a&&c.to===b)||(c.from===b&&c.to===a));}
+function clearHL(){document.querySelectorAll('.tc').forEach(e=>e.classList.remove('act','dim','tr'));document.querySelectorAll('.cl').forEach(e=>e.classList.remove('hi','dm'));activeTbl=null;}
+
+// ═══════════════════ PATH TRACER ═══════════════════
+function tracePathFrom(id){
+  if(!traceStart){traceStart=id;ELS[id].classList.add('tr');toast('Path start: '+id+' — Shift+Click another table');return;}
+  if(traceStart===id){traceStart=null;clearHL();return;}
+  const path=bfs(traceStart,id);traceStart=null;clearHL();
+  if(!path){toast('⚠ No path found between these tables');return;}
+  path.forEach(n=>ELS[n].classList.add('tr'));
+  for(let i=0;i<path.length-1;i++){document.querySelectorAll('.cl').forEach(el=>{if((el.dataset.from===path[i]&&el.dataset.to===path[i+1])||(el.dataset.from===path[i+1]&&el.dataset.to===path[i]))el.classList.add('hi');});}
+  toast('Path ('+path.length+' tables): '+path.join(' → '));
+}
+function bfs(s,d){const v={[s]:null},q=[s];while(q.length){const n=q.shift();if(n===d){const p=[];let c=d;while(c!==null){p.unshift(c);c=v[c];}return p;}for(const nb of G[n]||[]){if(!(nb in v)){v[nb]=n;q.push(nb);}}}return null;}
+
+// ═══════════════════ CONTEXT MENU ═══════════════════
+const ctxEl=document.getElementById('ctx');
+function showCtx(x,y){ctxEl.style.display='block';ctxEl.style.left=Math.min(x,window.innerWidth-180)+'px';ctxEl.style.top=Math.min(y,window.innerHeight-220)+'px';}
+function hideCtx(){ctxEl.style.display='none';}
+document.getElementById('ctx-inspect').onclick=()=>{hideCtx();if(ctxTarget)selectTable(ctxTarget);};
+document.getElementById('ctx-collapse').onclick=()=>{hideCtx();if(!ctxTarget)return;const el=ELS[ctxTarget.id];el.classList.toggle('col');el.querySelector('.cb').textContent=el.classList.contains('col')?'▸':'▾';setTimeout(()=>{drawConns();updMM();},40);};
+document.getElementById('ctx-trace').onclick=()=>{hideCtx();if(ctxTarget)tracePathFrom(ctxTarget.id);};
+document.getElementById('ctx-center').onclick=()=>{hideCtx();if(ctxTarget)jumpTo(ctxTarget.id);};
+document.getElementById('ctx-edit').onclick=()=>{hideCtx();if(!ctxTarget)return;const span=ELS[ctxTarget.id].querySelector('.tname');if(span)startEditName(ctxTarget,span);};
+document.getElementById('ctx-addfield').onclick=()=>{hideCtx();if(!ctxTarget)return;const name=prompt('Field name:');if(!name)return;const type=prompt('Type:','VARCHAR')||'VARCHAR';ctxTarget.fields.push({name,type});ELS[ctxTarget.id].querySelector('.add-field-btn').click();};
+document.getElementById('ctx-sql').onclick=()=>{hideCtx();if(ctxTarget){navigator.clipboard.writeText(genTableSQL(ctxTarget));toast('✓ CREATE SQL copied');}};
+document.getElementById('ctx-dict').onclick=()=>{hideCtx();if(ctxTarget){openDict(ctxTarget.id);}};
+document.addEventListener('click',()=>hideCtx());
+document.addEventListener('contextmenu',e=>{if(!e.target.closest('.tc'))hideCtx();});
+
+// ═══════════════════ UNDO / REDO ═══════════════════
+function doUndo(){
+  if(!undoStack.length){toast('Nothing to undo');return;}
+  const s=undoStack.pop();
+  const t=TABLES.find(x=>x.id===s.id);if(!t)return;
+  redoStack.push({id:t.id,x:t.x,y:t.y});
+  t.x=s.x;t.y=s.y;ELS[t.id].style.left=s.x+'px';ELS[t.id].style.top=s.y+'px';
+  drawConns();updMM();toast('↩ Undid move: '+s.id);
+}
+function doRedo(){
+  if(!redoStack.length){toast('Nothing to redo');return;}
+  const s=redoStack.pop();
+  const t=TABLES.find(x=>x.id===s.id);if(!t)return;
+  undoStack.push({id:t.id,x:t.x,y:t.y});
+  t.x=s.x;t.y=s.y;ELS[t.id].style.left=s.x+'px';ELS[t.id].style.top=s.y+'px';
+  drawConns();updMM();toast('↪ Redid move: '+s.id);
+}
+let undoT;function showUndoInd(id){const el=document.getElementById('undo-ind');document.getElementById('undo-tbl').textContent=id;el.style.display='block';clearTimeout(undoT);undoT=setTimeout(()=>el.style.display='none',2000);}
+
+// ═══════════════════ DRAW CONNECTIONS ═══════════════════
+function gctr(id){const t=TABLES.find(x=>x.id===id),el=ELS[id];return{x:t.x+el.offsetWidth/2,y:t.y+el.offsetHeight/2};}
+function gedge(fid,tid){
+  const t=TABLES.find(x=>x.id===fid),el=ELS[fid],to=gctr(tid);
+  const cx=t.x+el.offsetWidth/2,cy=t.y+el.offsetHeight/2,dx=to.x-cx,dy=to.y-cy,w=el.offsetWidth/2,h=el.offsetHeight/2;
+  let ex,ey;if(Math.abs(dx/w)>Math.abs(dy/h)){ex=cx+(dx>0?w:-w);ey=cy+dy*(w/Math.abs(dx));}else{ey=cy+(dy>0?h:-h);ex=cx+dx*(h/Math.abs(dy));}
+  return{x:ex,y:ey};
+}
+function cfmark(svg,x,y,ang,type,col,op){
+  const s=14,c=Math.cos(ang),sn=Math.sin(ang),px=-sn,py=c;
+  const g=document.createElementNS('http://www.w3.org/2000/svg','g');g.setAttribute('opacity',op);
+  const ln=(x1,y1,x2,y2)=>{const l=document.createElementNS('http://www.w3.org/2000/svg','line');l.setAttribute('x1',x1);l.setAttribute('y1',y1);l.setAttribute('x2',x2);l.setAttribute('y2',y2);l.setAttribute('stroke',col);l.setAttribute('stroke-width',1.8);l.setAttribute('stroke-linecap','round');g.appendChild(l);};
+  const ci=(cx,cy,r)=>{const cc=document.createElementNS('http://www.w3.org/2000/svg','circle');cc.setAttribute('cx',cx);cc.setAttribute('cy',cy);cc.setAttribute('r',r);cc.setAttribute('fill','var(--bg)');cc.setAttribute('stroke',col);cc.setAttribute('stroke-width',1.5);g.appendChild(cc);};
+  const bar=d=>ln(x+c*d+px*s*.55,y+sn*d+py*s*.55,x+c*d-px*s*.55,y+sn*d-py*s*.55);
+  const crow=d=>{ln(x,y,x+c*d,y+sn*d);ln(x+c*d+px*s*.6,y+sn*d+py*s*.6,x+c*(d-s*.5),y+sn*(d-s*.5));ln(x+c*d-px*s*.6,y+sn*d-py*s*.6,x+c*(d-s*.5),y+sn*(d-s*.5));};
+  if(type==='one'){bar(s*.5);bar(s*1.1);}else if(type==='one-opt'){bar(s*1.1);ci(x+c*s*.4,y+sn*s*.4,4);}else if(type==='many'){crow(s*1.2);bar(s*1.5);}else if(type==='many-opt'){crow(s*1.2);ci(x+c*s*1.8,y+sn*s*1.8,4);}
+  svg.appendChild(g);
+}
+function drawConns(){
+  svgl.innerHTML='';
+  const vis=new Set(TABLES.filter(t=>activeM.has(t.module)).map(t=>t.id));
+  CONNS.forEach((c,i)=>{
+    if(!vis.has(c.from)||!vis.has(c.to))return;
+    const p1=gedge(c.from,c.to),p2=gedge(c.to,c.from);
+    const dx=p2.x-p1.x,dy=p2.y-p1.y;
+    const cx1=p1.x+dx*.3+dy*.1,cy1=p1.y+dy*.3-dx*.1,cx2=p2.x-dx*.3+dy*.1,cy2=p2.y-dy*.3-dx*.1;
+    const path=document.createElementNS('http://www.w3.org/2000/svg','path');
+    path.setAttribute('d',`M${p1.x},${p1.y} C${cx1},${cy1} ${cx2},${cy2} ${p2.x},${p2.y}`);
+    path.setAttribute('class','cl');path.setAttribute('stroke',c.color);
+    path.setAttribute('data-from',c.from);path.setAttribute('data-to',c.to);
+    path.id=`cl-${i}`;svgl.appendChild(path);
+    cfmark(svgl,p1.x,p1.y,Math.atan2(cy1-p1.y,cx1-p1.x),c.fromCard,c.color,'0.8');
+    cfmark(svgl,p2.x,p2.y,-Math.atan2(p2.y-cy2,p2.x-cx2)+Math.PI,c.toCard,c.color,'0.8');
+    const mx=(p1.x+p2.x)/2,my=(p1.y+p2.y)/2-9,lw=c.card.length*6+10;
+    const bg=document.createElementNS('http://www.w3.org/2000/svg','rect');
+    bg.setAttribute('x',mx-lw/2);bg.setAttribute('y',my-11);bg.setAttribute('width',lw);bg.setAttribute('height',13);bg.setAttribute('rx',3);bg.setAttribute('fill','var(--bg)');bg.setAttribute('opacity','0.88');svgl.appendChild(bg);
+    const lbl=document.createElementNS('http://www.w3.org/2000/svg','text');
+    lbl.setAttribute('x',mx);lbl.setAttribute('y',my);lbl.setAttribute('text-anchor','middle');lbl.setAttribute('fill',c.color);lbl.setAttribute('font-size','10');lbl.setAttribute('font-family','JetBrains Mono,monospace');lbl.setAttribute('font-weight','600');lbl.setAttribute('opacity','0.95');
+    lbl.textContent=c.card;svgl.appendChild(lbl);
+  });
+}
+
+// ═══════════════════ SWIM LANES ═══════════════════
+function renderLanes(){
+  document.querySelectorAll('.sl,.sl-lbl').forEach(e=>e.remove());
+  if(!showLanes)return;
+  [1,2,3,4,5,6,7,8,9].forEach(mod=>{
+    const tbs=TABLES.filter(t=>t.module===mod&&activeM.has(mod));if(!tbs.length)return;
+    let mnx=1e9,mny=1e9,mxx=-1e9,mxy=-1e9;
+    tbs.forEach(t=>{const el=ELS[t.id];mnx=Math.min(mnx,t.x-14);mny=Math.min(mny,t.y-32);mxx=Math.max(mxx,t.x+el.offsetWidth+14);mxy=Math.max(mxy,t.y+el.offsetHeight+14);});
+    const col=MM[mod].color;
+    const l=document.createElement('div');l.className='sl';
+    l.style.cssText=`left:${mnx}px;top:${mny}px;width:${mxx-mnx}px;height:${mxy-mny}px;border-color:${col};background:${col}09;`;
+    cv.insertBefore(l,cv.firstChild);
+    const lb=document.createElement('div');lb.className='sl-lbl';lb.style.cssText=`left:${mnx+9}px;top:${mny+4}px;color:${col};`;lb.textContent=MM[mod].name;
+    cv.insertBefore(lb,cv.firstChild);
+  });
+}
+
+// ═══════════════════ RIGHT PANEL ═══════════════════
+function showPanel(t){
+  const out=CONNS.filter(c=>c.from===t.id),inc=CONNS.filter(c=>c.to===t.id);
+  const relH=(out.length+inc.length)===0?'<span style="color:var(--muted)">None</span>':[
+    ...out.map(c=>`<div style="margin:2px 0"><span class="rc" style="border-color:${c.color};color:${c.color}">${c.from}→${c.to}</span> <small style="color:var(--muted)">${c.card}·${c.label}</small></div>`),
+    ...inc.map(c=>`<div style="margin:2px 0"><span class="rc" style="border-color:${c.color};color:${c.color}">${c.from}→${c.to}</span> <small style="color:var(--muted)">${c.card}·${c.label}</small></div>`)
+  ].join('');
+  const nbrs=[...new Set([...out.map(c=>c.to),...inc.map(c=>c.from)])];
+  const fkCount=t.fields.filter(f=>f.fk).length;
+  document.getElementById('rp-body').innerHTML=`
+    <div class="is"><div class="il">Module</div><div class="iv" style="color:${MM[t.module].color}">${MM[t.module].name}</div></div>
+    <div class="is"><div class="il">Stats</div><div class="iv">
+      <span class="stat-badge" style="border-color:#fbbf24;color:#fbbf24">⊞ ${t.fields.length} fields</span>
+      <span class="stat-badge" style="border-color:#60a5fa;color:#60a5fa">🔗 ${fkCount} FKs</span>
+      <span class="stat-badge" style="border-color:${MM[t.module].color};color:${MM[t.module].color}">⇄ ${out.length+inc.length} rels</span>
+    </div></div>
+    <div class="is"><div class="il">Description</div><div class="iv" style="line-height:1.6">${t.desc}</div></div>
+    <div class="is"><div class="il">Fields (${t.fields.length})</div><div class="iv">${t.fields.map(f=>`<div style="padding:2px 0;color:${f.pk?'var(--pk)':f.fk?'var(--fk)':'var(--text)'}">${f.pk?'🔑':f.fk?'🔗':'·'} ${f.name} <span style="color:var(--muted);font-size:10px">${f.type}</span></div>`).join('')}</div></div>
+    <div class="is"><div class="il">Relationships</div><div class="iv">${relH}</div></div>
+    <div class="is"><div class="il">Connected Tables</div><div class="iv">${nbrs.map(n=>`<span class="rc" style="border-color:var(--border)" onclick="jumpTo('${n}')">${n}</span>`).join('')||'<span style="color:var(--muted)">None</span>'}</div></div>
+    <div class="is"><div class="il">CREATE SQL</div><div class="sqp">${genTableSQL(t)}</div></div>
+    <div style="display:flex;gap:6px;margin-top:8px;flex-wrap:wrap">
+      <button class="tb" style="flex:1;justify-content:center" onclick="openDict('${t.id}')">📖 Dictionary</button>
+      <button class="tb" style="flex:1;justify-content:center" onclick="tracePathFrom('${t.id}');closePanel()">⇢ Trace Path</button>
+    </div>`;
+  document.getElementById('rp-title').innerHTML=`${t.id} <button class="xb" onclick="closePanel()">✕</button>`;
+  document.getElementById('rp').classList.add('open');
+}
+function closePanel(){document.getElementById('rp').classList.remove('open');clearHL();updStats();}
+function jumpTo(id){const t=TABLES.find(x=>x.id===id);if(!t)return;const vw=cw.offsetWidth,vh=cw.offsetHeight;px=vw/2-t.x*sc-118*sc;py=vh/2-t.y*sc-60*sc;applyT();selectTable(t);}
+
+// ═══════════════════ SQL EXPORT ═══════════════════
+const TM={INT:'INT',VARCHAR:'VARCHAR(255)',TEXT:'TEXT',DECIMAL:'DECIMAL(15,2)',DATE:'DATE',DATETIME:'DATETIME',JSON:'JSON',ENUM:'VARCHAR(50)'};
+function genTableSQL(t){
+  const cols=t.fields.map(f=>`  ${f.name} ${TM[f.type]||f.type}${f.pk?' NOT NULL AUTO_INCREMENT':''}`);
+  const pk=t.fields.find(f=>f.pk);if(pk)cols.push(`  PRIMARY KEY (${pk.name})`);
+  const fks=t.fields.filter(f=>f.fk);
+  fks.forEach(f=>{CONNS.filter(c=>c.from===t.id).forEach(c=>{const ref=TABLES.find(x=>x.id===c.to);if(ref){const rk=ref.fields.find(rf=>rf.pk);if(rk)cols.push(`  FOREIGN KEY (${f.name}) REFERENCES ${ref.id}(${rk.name})`);}});});
+  return `CREATE TABLE \`${t.id}\` (\n${cols.join(',\n')}\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;`;
+}
+function genFullSQL(){return'-- LoanCore360 Full Schema\n-- Generated: '+new Date().toISOString().slice(0,10)+'\n\n'+TABLES.map(t=>genTableSQL(t)).join('\n\n');}
+function genModSQL(mod){return'-- Module: '+MM[mod].name+'\n\n'+TABLES.filter(t=>t.module==mod).map(t=>genTableSQL(t)).join('\n\n');}
+function openSql(){
+  const te=document.getElementById('sql-tabs');
+  te.innerHTML='<button class="stab on" onclick="setSqlTab(-1,this)">All</button>'+Object.entries(MM).map(([k,v])=>`<button class="stab" onclick="setSqlTab(${k},this)">${v.tag}</button>`).join('');
+  setSqlTab(-1,te.querySelector('.stab'));
+  document.getElementById('sql-bg').classList.add('open');
+}
+function setSqlTab(m,btn){document.querySelectorAll('.stab').forEach(b=>b.classList.remove('on'));btn.classList.add('on');sqlTxt=m===-1?genFullSQL():genModSQL(m);document.getElementById('sql-pre').textContent=sqlTxt;}
+function copySql(){navigator.clipboard.writeText(sqlTxt).then(()=>toast('✓ SQL copied!'));}
+function dlSql(){const a=document.createElement('a');a.href='data:text/sql;charset=utf-8,'+encodeURIComponent(sqlTxt);a.download='loancore360_schema.sql';a.click();toast('✓ SQL downloaded!');}
+
+// ═══════════════════ PNG / SVG EXPORT ═══════════════════
+function exportPNG(){
+  toast('📸 Rendering export…');
+  setTimeout(()=>{
+    // Build a simple SVG snapshot of visible tables + connections
+    let mnx=1e9,mny=1e9,mxx=-1e9,mxy=-1e9;
+    const vis=TABLES.filter(t=>activeM.has(t.module));
+    vis.forEach(t=>{const el=ELS[t.id];mnx=Math.min(mnx,t.x);mny=Math.min(mny,t.y);mxx=Math.max(mxx,t.x+el.offsetWidth);mxy=Math.max(mxy,t.y+el.offsetHeight);});
+    const pad=40,W=mxx-mnx+pad*2,H=mxy-mny+pad*2;
+    const svgNS='http://www.w3.org/2000/svg';
+    const svg=document.createElementNS(svgNS,'svg');
+    svg.setAttribute('xmlns','http://www.w3.org/2000/svg');
+    svg.setAttribute('width',W);svg.setAttribute('height',H);
+    svg.setAttribute('viewBox',`0 0 ${W} ${H}`);
+    // bg
+    const bg=document.createElementNS(svgNS,'rect');bg.setAttribute('width',W);bg.setAttribute('height',H);bg.setAttribute('fill','#0a0d14');svg.appendChild(bg);
+    // connections
+    CONNS.forEach(c=>{
+      if(!activeM.has(TABLES.find(x=>x.id===c.from)?.module)||!activeM.has(TABLES.find(x=>x.id===c.to)?.module))return;
+      const p1=gedge(c.from,c.to),p2=gedge(c.to,c.from);
+      const dx=p2.x-p1.x,dy=p2.y-p1.y,cx1=p1.x+dx*.3+dy*.1,cy1=p1.y+dy*.3-dx*.1,cx2=p2.x-dx*.3+dy*.1,cy2=p2.y-dy*.3-dx*.1;
+      const path=document.createElementNS(svgNS,'path');
+      path.setAttribute('d',`M${p1.x-mnx+pad},${p1.y-mny+pad} C${cx1-mnx+pad},${cy1-mny+pad} ${cx2-mnx+pad},${cy2-mny+pad} ${p2.x-mnx+pad},${p2.y-mny+pad}`);
+      path.setAttribute('stroke',c.color);path.setAttribute('fill','none');path.setAttribute('stroke-width','1.5');path.setAttribute('opacity','0.6');svg.appendChild(path);
+    });
+    // tables
+    vis.forEach(t=>{
+      const el=ELS[t.id],rx=t.x-mnx+pad,ry=t.y-mny+pad,rw=el.offsetWidth,rh=el.offsetHeight;
+      const rect=document.createElementNS(svgNS,'rect');rect.setAttribute('x',rx);rect.setAttribute('y',ry);rect.setAttribute('width',rw);rect.setAttribute('height',rh);rect.setAttribute('rx',9);rect.setAttribute('fill','#111520');rect.setAttribute('stroke',MM[t.module].color);rect.setAttribute('stroke-width','1.5');svg.appendChild(rect);
+      // header bg
+      const hbg=document.createElementNS(svgNS,'rect');hbg.setAttribute('x',rx);hbg.setAttribute('y',ry);hbg.setAttribute('width',rw);hbg.setAttribute('height',28);hbg.setAttribute('rx',8);hbg.setAttribute('fill',MM[t.module].color+'22');svg.appendChild(hbg);
+      const htxt=document.createElementNS(svgNS,'text');htxt.setAttribute('x',rx+10);htxt.setAttribute('y',ry+18);htxt.setAttribute('fill',MM[t.module].color);htxt.setAttribute('font-size','12');htxt.setAttribute('font-weight','bold');htxt.setAttribute('font-family','monospace');htxt.textContent=t.id;svg.appendChild(htxt);
+      t.fields.forEach((f,fi)=>{
+        const fy=ry+30+(fi*17);if(fy>ry+rh-4)return;
+        const fc=f.pk?'#fbbf24':f.fk?'#60a5fa':'#e2e8f0';
+        const ft=document.createElementNS(svgNS,'text');ft.setAttribute('x',rx+8);ft.setAttribute('y',fy+12);ft.setAttribute('fill',fc);ft.setAttribute('font-size','10');ft.setAttribute('font-family','monospace');ft.textContent=(f.pk?'PK ':f.fk?'FK ':'')+f.name+' '+f.type;svg.appendChild(ft);
+      });
+    });
+    const svgStr=new XMLSerializer().serializeToString(svg);
+    const blob=new Blob([svgStr],{type:'image/svg+xml'});
+    const url=URL.createObjectURL(blob);
+    const a=document.createElement('a');a.href=url;a.download='loancore360_er.svg';a.click();
+    setTimeout(()=>URL.revokeObjectURL(url),1000);
+    toast('✓ SVG exported!');
+  },100);
+}
+
+// ═══════════════════ ANALYSIS MODAL ═══════════════════
+let anaTab=0;
+function openAna(){setAnaTab(0,document.querySelector('.atab.on')||document.querySelector('.atab'));document.getElementById('ana-bg').classList.add('open');}
+function setAnaTab(i,btn){
+  anaTab=i;document.querySelectorAll('.atab').forEach(b=>b.classList.remove('on'));btn.classList.add('on');
+  const body=document.getElementById('ana-body');
+  if(i===0) body.innerHTML=renderTableStats();
+  else if(i===1) body.innerHTML=renderLifecycle();
+  else if(i===2) body.innerHTML=renderDetectors();
+  else if(i===3) body.innerHTML=renderDiff();
+}
+function renderTableStats(){
+  return`<div class="stats-grid">${TABLES.map(t=>{
+    const fkc=t.fields.filter(f=>f.fk).length;
+    const outR=CONNS.filter(c=>c.from===t.id).length;
+    const inR=CONNS.filter(c=>c.to===t.id).length;
+    return`<div class="stats-card"><h5 style="color:${MM[t.module].color}">⬡ ${t.id}</h5>
+      <div style="font-size:10px;color:var(--muted);margin-bottom:6px">${MM[t.module].name}</div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:4px;font-size:11px">
+        <div>🔑 PK: <strong>1</strong></div>
+        <div>🔗 FK: <strong>${fkc}</strong></div>
+        <div>⊞ Fields: <strong>${t.fields.length}</strong></div>
+        <div>⇄ Rels: <strong>${outR+inR}</strong></div>
+        <div>→ Out: <strong>${outR}</strong></div>
+        <div>← In: <strong>${inR}</strong></div>
+      </div></div>`;}).join('')}</div>`;
+}
+function renderLifecycle(){
+  const steps=[
+    {num:'1',color:'#00d4ff',title:'Customer Onboarding',tables:['Customer'],desc:'A borrower is registered with KYC verification. CustomerID is assigned.'},
+    {num:'2',color:'#00d4ff',title:'Loan Application',tables:['LoanApplication','LoanDocument'],desc:'Customer submits application for a product. Documents are uploaded and verified.'},
+    {num:'3',color:'#10b981',title:'Product Matching',tables:['LoanProduct','InterestRule','ChargeRule'],desc:'Application is matched to a product template with applicable rates and fees.'},
+    {num:'4',color:'#f59e0b',title:'Credit Appraisal',tables:['CreditAppraisal'],desc:'Credit analyst scores the application. Risk score and remarks recorded.'},
+    {num:'5',color:'#f59e0b',title:'Multi-Level Approval',tables:['ApprovalStage'],desc:'Application passes through one or more approval stages. Approve/Reject/Return.'},
+    {num:'6',color:'#ef4444',title:'Account Creation',tables:['LoanAccount'],desc:'Approved application creates a LoanAccount with sanctioned amount and EMI schedule.'},
+    {num:'7',color:'#ef4444',title:'Disbursement',tables:['Disbursement','LedgerEntry'],desc:'Funds transferred via NEFT/RTGS. Internal GL entries posted.'},
+    {num:'8',color:'#06b6d4',title:'Loan Servicing',tables:['RepaymentSchedule','Repayment','InterestAccrual'],desc:'EMI schedule auto-generated. Borrower makes monthly repayments. Interest accrues daily.'},
+    {num:'9',color:'#a855f7',title:'Delinquency & Collections',tables:['DelinquencyRecord','CollectionAction'],desc:'Overdue EMIs tracked by DPD bucket. Collections officers take recovery actions.'},
+    {num:'10',color:'#14b8a6',title:'Reporting & Notifications',tables:['LoanReport','Notification','AuditLog'],desc:'Analytics reports generated. Alerts sent to users. All actions audit-logged.'},
+  ];
+  return`<div style="padding:4px 0">${steps.map((s,i)=>`
+    <div class="flow-step">
+      <div class="flow-num" style="background:${s.color}22;color:${s.color};border:2px solid ${s.color}">${s.num}</div>
+      <div style="flex:1">
+        <div style="font-family:'Syne',sans-serif;font-weight:700;font-size:13px;color:${s.color};margin-bottom:3px">${s.title}</div>
+        <div style="font-size:11px;color:var(--text);margin-bottom:4px">${s.desc}</div>
+        <div>${s.tables.map(tb=>`<span class="rc" style="border-color:${s.color};color:${s.color};cursor:pointer" onclick="closeModal('ana-bg');jumpTo('${tb}')">${tb}</span>`).join('')}</div>
+      </div>
+    </div>${i<steps.length-1?'<div class="flow-arrow">↓</div>':''}`).join('')}</div>`;
+}
+function renderDetectors(){
+  // Orphan tables (no FK connections at all)
+  const orphans=TABLES.filter(t=>{const hasFKOut=CONNS.some(c=>c.from===t.id),hasFKIn=CONNS.some(c=>c.to===t.id);return !hasFKOut&&!hasFKIn;});
+  // Tables with only incoming (leaf nodes)
+  const leafs=TABLES.filter(t=>{const out=CONNS.filter(c=>c.from===t.id).length;const inc=CONNS.filter(c=>c.to===t.id).length;return out===0&&inc>0;});
+  // Circular dependency detection (DFS)
+  const cycles=[];const visited=new Set(),recStack=new Set();
+  function dfsCycle(n,path){
+    visited.add(n);recStack.add(n);
+    for(const nb of G[n]||[]){
+      if(!visited.has(nb)){if(dfsCycle(nb,[...path,nb])&&cycles.length<5)return true;}
+      else if(recStack.has(nb)){const ci=path.indexOf(nb);if(ci>=0)cycles.push(path.slice(ci).join('→'));return true;}
+    }
+    recStack.delete(n);return false;
+  }
+  TABLES.forEach(t=>{if(!visited.has(t.id))dfsCycle(t.id,[t.id]);});
+  // Highly connected tables
+  const hub=TABLES.map(t=>({id:t.id,deg:CONNS.filter(c=>c.from===t.id||c.to===t.id).length})).sort((a,b)=>b.deg-a.deg).slice(0,5);
+  return`
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px">
+      <div>
+        <div style="font-family:'Syne',sans-serif;font-weight:700;font-size:13px;color:var(--red);margin-bottom:8px">⚠ Orphan Tables (no FKs)</div>
+        ${orphans.length?orphans.map(t=>`<div style="padding:4px 0;font-size:11px">⬡ <span class="rc" style="border-color:var(--red);color:var(--red);cursor:pointer" onclick="closeModal('ana-bg');jumpTo('${t.id}')">${t.id}</span> <small style="color:var(--muted)">${MM[t.module].tag}</small></div>`).join(''):`<div style="font-size:11px;color:var(--green)">✓ No orphan tables found</div>`}
+      </div>
+      <div>
+        <div style="font-family:'Syne',sans-serif;font-weight:700;font-size:13px;color:var(--orange);margin-bottom:8px">🍃 Leaf Tables (no outgoing FKs)</div>
+        ${leafs.map(t=>`<div style="padding:4px 0;font-size:11px">⬡ <span class="rc" style="border-color:var(--orange);color:var(--orange);cursor:pointer" onclick="closeModal('ana-bg');jumpTo('${t.id}')">${t.id}</span> <small style="color:var(--muted)">${MM[t.module].tag}</small></div>`).join('')}
+      </div>
+      <div>
+        <div style="font-family:'Syne',sans-serif;font-weight:700;font-size:13px;color:var(--red);margin-bottom:8px">🔁 Circular Dependencies</div>
+        ${cycles.length?cycles.map(c=>`<div style="font-size:11px;color:var(--red);padding:3px 0">⟳ ${c}</div>`).join(''):`<div style="font-size:11px;color:var(--green)">✓ No circular dependencies detected</div>`}
+      </div>
+      <div>
+        <div style="font-family:'Syne',sans-serif;font-weight:700;font-size:13px;color:var(--accent);margin-bottom:8px">🏆 Most Connected Tables</div>
+        ${hub.map((h,i)=>`<div style="padding:3px 0;font-size:11px;display:flex;align-items:center;gap:6px"><span style="color:var(--muted)">#${i+1}</span><span class="rc" style="border-color:var(--accent);color:var(--accent);cursor:pointer" onclick="closeModal('ana-bg');jumpTo('${h.id}')">${h.id}</span><span style="color:var(--muted)">${h.deg} relations</span></div>`).join('')}
+      </div>
+    </div>`;
+}
+function renderDiff(){
+  // Compare two modules side by side
+  const moduleA=TABLES.filter(t=>t.module===2);// Customer & App
+  const moduleB=TABLES.filter(t=>t.module===5);// Account & Disbursement
+  return`<div>
+    <div style="font-size:11px;color:var(--muted);margin-bottom:12px">Compare two modules side-by-side to spot structural differences.</div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:14px">
+      <div style="padding:8px;background:rgba(16,185,129,.08);border:1px solid #10b981;border-radius:7px">
+        <div style="font-family:'Syne',sans-serif;font-weight:700;color:#00d4ff;margin-bottom:6px">Module: Customer & Application</div>
+        ${moduleA.map(t=>`<div style="padding:3px 0;font-size:11px"><strong style="color:#00d4ff">⬡ ${t.id}</strong> <span style="color:var(--muted)">${t.fields.length}f · ${CONNS.filter(c=>c.from===t.id||c.to===t.id).length}r</span></div>`).join('')}
+      </div>
+      <div style="padding:8px;background:rgba(239,68,68,.07);border:1px solid #ef4444;border-radius:7px">
+        <div style="font-family:'Syne',sans-serif;font-weight:700;color:#ef4444;margin-bottom:6px">Module: Account & Disbursement</div>
+        ${moduleB.map(t=>`<div style="padding:3px 0;font-size:11px"><strong style="color:#ef4444">⬡ ${t.id}</strong> <span style="color:var(--muted)">${t.fields.length}f · ${CONNS.filter(c=>c.from===t.id||c.to===t.id).length}r</span></div>`).join('')}
+      </div>
+    </div>
+    <div style="font-family:'Syne',sans-serif;font-weight:700;font-size:13px;margin-bottom:8px;color:var(--accent)">Common Pattern Fields</div>
+    <div style="font-size:11px;color:var(--muted);margin-bottom:10px">Fields that appear in both modules (ID, Status, Date patterns):</div>
+    ${['ID','Status','Date','Amount'].map(pat=>{
+      const aHas=moduleA.some(t=>t.fields.some(f=>f.name.includes(pat)));
+      const bHas=moduleB.some(t=>t.fields.some(f=>f.name.includes(pat)));
+      return`<div class="diff-row"><div class="diff-a">${aHas?'✓':'✗'} ${pat} fields in Customer/App</div><div class="diff-b">${bHas?'✓':'✗'} ${pat} fields in Account</div></div>`;
+    }).join('')}
+  </div>`;
+}
+
+// ═══════════════════ DATA DICTIONARY ═══════════════════
+function openDict(focusTable){
+  const body=document.getElementById('dict-body');
+  body.innerHTML=TABLES.map(t=>`
+    <div class="dict-section" id="dict-${t.id}">
+      <h4 style="background:${MM[t.module].color}18;color:${MM[t.module].color}">⬡ ${t.id} <small style="font-weight:400;opacity:.7">${MM[t.module].name}</small></h4>
+      <div style="font-size:11px;color:var(--muted);margin:0 10px 8px">${t.desc}</div>
+      <table class="dict-table"><thead><tr><th>Field</th><th>Type</th><th>Key</th><th>Description</th></tr></thead>
+      <tbody>${t.fields.map(f=>`<tr>
+        <td style="color:${f.pk?'var(--pk)':f.fk?'var(--fk)':'var(--text)'}"><strong>${f.name}</strong></td>
+        <td style="color:var(--muted)">${f.type}</td>
+        <td>${f.pk?'🔑 PK':f.fk?'🔗 FK':''}</td>
+        <td class="editable" contenteditable="true" data-key="${t.id}.${f.name}">${FIELD_DESCS[t.id+'.'+f.name]||'<span style="color:var(--muted)">Click to add description…</span>'}</td>
+      </tr>`).join('')}</tbody></table>
+    </div>`).join('');
+  // save edits back to FIELD_DESCS
+  body.querySelectorAll('[contenteditable]').forEach(el=>{
+    el.addEventListener('blur',()=>{FIELD_DESCS[el.dataset.key]=el.textContent.trim();});
+  });
+  document.getElementById('dict-bg').classList.add('open');
+  if(focusTable){setTimeout(()=>{const el=document.getElementById('dict-'+focusTable);if(el)el.scrollIntoView({behavior:'smooth',block:'start'});},100);}
+}
+
+// ═══════════════════ SEARCH ═══════════════════
+const siEl=document.getElementById('si'),srEl=document.getElementById('sr');
+siEl.addEventListener('input',()=>{
+  const q=siEl.value.toLowerCase().trim();if(!q){srEl.style.display='none';return;}
+  const ms=[];
+  TABLES.forEach(t=>{
+    if(t.id.toLowerCase().includes(q))ms.push({table:t,match:'table',text:t.id,sub:MM[t.module].tag});
+    t.fields.forEach(f=>{if(f.name.toLowerCase().includes(q))ms.push({table:t,match:'field',text:`${t.id}.${f.name}`,sub:f.type});});
+  });
+  if(!ms.length){srEl.style.display='none';return;}
+  srEl.innerHTML=ms.slice(0,10).map((m,i)=>`<div class="sri" data-i="${i}"><span style="color:${MM[m.table.module].color}">⬡</span><span>${m.text}</span><span class="srb" style="color:${m.match==='field'?'var(--fk)':'var(--accent)'}">${m.sub}</span></div>`).join('');
+  srEl.style.display='block';
+  ms.slice(0,10).forEach((m,i)=>{srEl.querySelector(`[data-i="${i}"]`).addEventListener('click',()=>{srEl.style.display='none';siEl.value='';jumpTo(m.table.id);});});
+});
+document.addEventListener('click',e=>{if(!e.target.closest('#sw'))srEl.style.display='none';});
+
+// ═══════════════════ MODULE FILTER ═══════════════════
+document.querySelectorAll('.mc').forEach(chip=>{
+  chip.addEventListener('click',()=>{
+    const m=parseInt(chip.dataset.m);
+    if(activeM.has(m)){activeM.delete(m);chip.classList.remove('on');}else{activeM.add(m);chip.classList.add('on');}
+    TABLES.forEach(t=>{ELS[t.id].style.display=activeM.has(t.module)?'':'none';});
+    drawConns();renderLanes();updStats();
+  });
+});
+
+// ═══════════════════ TOOLBAR ═══════════════════
+document.getElementById('btn-lanes').addEventListener('click',function(){showLanes=!showLanes;this.classList.toggle('on',showLanes);renderLanes();});
+document.getElementById('btn-col').addEventListener('click',()=>{TABLES.forEach(t=>{ELS[t.id].classList.add('col');ELS[t.id].querySelector('.cb').textContent='▸';});setTimeout(()=>{drawConns();updMM();},50);});
+document.getElementById('btn-exp').addEventListener('click',()=>{TABLES.forEach(t=>{ELS[t.id].classList.remove('col');ELS[t.id].querySelector('.cb').textContent='▾';});setTimeout(()=>{drawConns();updMM();},50);});
+document.getElementById('btn-lay').addEventListener('click',()=>{
+  const grp={};TABLES.forEach(t=>{if(!grp[t.module])grp[t.module]=[];grp[t.module].push(t);});
+  const GX=282,GY=56,COL=4;let gx=0,gy=0;
+  Object.entries(grp).forEach(([mod,tbs])=>{const bx=60+gx*GX*COL,by=80+gy*410;tbs.forEach((t,i)=>{const c=i%COL,r=Math.floor(i/COL);t.x=bx+c*GX;t.y=by+r*GY;ELS[t.id].style.left=t.x+'px';ELS[t.id].style.top=t.y+'px';});gx++;if(gx>=3){gx=0;gy++;}});
+  setTimeout(()=>{drawConns();renderLanes();updMM();},50);toast('✓ Tables arranged by module');
+});
+document.getElementById('btn-sql').addEventListener('click',openSql);
+document.getElementById('btn-png').addEventListener('click',exportPNG);
+document.getElementById('btn-ana').addEventListener('click',openAna);
+document.getElementById('btn-dict').addEventListener('click',()=>openDict(null));
+document.getElementById('btn-theme').addEventListener('click',function(){document.body.classList.toggle('lt');this.querySelector('.i').textContent=document.body.classList.contains('lt')?'🌙':'☀';setTimeout(()=>{drawConns();updMM();},50);});
+document.getElementById('btn-kb').addEventListener('click',()=>document.getElementById('kbhelp').classList.add('open'));
+function closeKb(){document.getElementById('kbhelp').classList.remove('open');}
+
+// ═══════════════════ PAN & ZOOM ═══════════════════
+function applyT(){cv.style.transform=`translate(${px}px,${py}px) scale(${sc})`;document.getElementById('st-z').textContent=Math.round(sc*100)+'%';updMM();}
+cw.addEventListener('wheel',e=>{e.preventDefault();const r=cw.getBoundingClientRect(),mx=(e.clientX-r.left-px)/sc,my=(e.clientY-r.top-py)/sc;const d=e.deltaY>0?.9:1.1;sc=Math.max(.18,Math.min(3,sc*d));px=e.clientX-r.left-mx*sc;py=e.clientY-r.top-my*sc;applyT();},{passive:false});
+cw.addEventListener('mousedown',e=>{if(e.target===cw||e.target===cv||e.target.classList.contains('gb')||e.target===svgl){panning=true;psx=e.clientX;psy=e.clientY;ppx=px;ppy=py;cw.classList.add('gr');}});
+document.addEventListener('mousemove',e=>{if(!panning)return;px=ppx+(e.clientX-psx);py=ppy+(e.clientY-psy);applyT();});
+document.addEventListener('mouseup',()=>{panning=false;cw.classList.remove('gr');});
+document.getElementById('zi').onclick=()=>{sc=Math.min(3,sc*1.2);applyT();};
+document.getElementById('zo').onclick=()=>{sc=Math.max(.18,sc*.8);applyT();};
+document.getElementById('zf').onclick=fitAll;
+function fitAll(){let mnx=1e9,mny=1e9,mxx=-1e9,mxy=-1e9;TABLES.filter(t=>activeM.has(t.module)).forEach(t=>{const el=ELS[t.id];mnx=Math.min(mnx,t.x);mny=Math.min(mny,t.y);mxx=Math.max(mxx,t.x+el.offsetWidth);mxy=Math.max(mxy,t.y+el.offsetHeight);});const vw=cw.offsetWidth,vh=cw.offsetHeight,pd=60;sc=Math.min(2,(vw-pd*2)/(mxx-mnx),(vh-pd*2)/(mxy-mny));px=vw/2-((mnx+mxx)/2)*sc;py=vh/2-((mny+mxy)/2)*sc;applyT();clearHL();closePanel();}
+
+// ═══════════════════ MINIMAP ═══════════════════
+function updMM(){
+  const mm=document.getElementById('mmc'),ctx=mm.getContext('2d'),W=mm.width,H=mm.height;
+  ctx.clearRect(0,0,W,H);
+  ctx.fillStyle=document.body.classList.contains('lt')?'#e8eef5':'#0d1120';ctx.fillRect(0,0,W,H);
+  let mnx=1e9,mny=1e9,mxx=-1e9,mxy=-1e9;
+  TABLES.forEach(t=>{mnx=Math.min(mnx,t.x);mny=Math.min(mny,t.y);mxx=Math.max(mxx,t.x+230);mxy=Math.max(mxy,t.y+180);});
+  const bw=mxx-mnx||1,bh=mxy-mny||1,ms=Math.min((W-6)/bw,(H-6)/bh),ox=(W-bw*ms)/2,oy=(H-bh*ms)/2;
+  CONNS.forEach(c=>{const f=TABLES.find(x=>x.id===c.from),t2=TABLES.find(x=>x.id===c.to);if(!f||!t2)return;ctx.beginPath();ctx.moveTo(ox+(f.x+115-mnx)*ms,oy+(f.y+60-mny)*ms);ctx.lineTo(ox+(t2.x+115-mnx)*ms,oy+(t2.y+60-mny)*ms);ctx.strokeStyle=c.color+'44';ctx.lineWidth=0.6;ctx.stroke();});
+  TABLES.forEach(t=>{if(!activeM.has(t.module))return;const rx=ox+(t.x-mnx)*ms,ry=oy+(t.y-mny)*ms,rw=230*ms,rh=Math.min(180,ELS[t.id].offsetHeight)*ms;ctx.fillStyle=MM[t.module].color+'22';ctx.strokeStyle=MM[t.module].color+'77';ctx.lineWidth=0.4;ctx.beginPath();ctx.roundRect(rx,ry,Math.max(rw,1.5),Math.max(rh,1.5),1);ctx.fill();ctx.stroke();});
+  const mmEl=document.getElementById('mm'),vw=cw.offsetWidth,vh=cw.offsetHeight;
+  const vx=ox+(-px/sc-mnx)*ms,vy=oy+(-py/sc-mny)*ms,vwm=vw/sc*ms,vhm=vh/sc*ms;
+  const vp=document.getElementById('mmv');vp.style.left=(vx/W*mmEl.offsetWidth)+'px';vp.style.top=(vy/H*mmEl.offsetHeight)+'px';vp.style.width=(vwm/W*mmEl.offsetWidth)+'px';vp.style.height=(vhm/H*mmEl.offsetHeight)+'px';
+}
+
+// ═══════════════════ STATS ═══════════════════
+function updStats(){
+  const vis=TABLES.filter(t=>activeM.has(t.module)).length;
+  document.getElementById('st-v').textContent=vis;
+  document.getElementById('st-s').textContent=activeTbl||'—';
+  document.getElementById('st-r').textContent=CONNS.filter(c=>activeM.has(TABLES.find(x=>x.id===c.from)?.module||0)&&activeM.has(TABLES.find(x=>x.id===c.to)?.module||0)).length;
+}
+
+// ═══════════════════ MODAL HELPER ═══════════════════
+function closeModal(id){document.getElementById(id).classList.remove('open');}
+
+// ═══════════════════ KEYBOARD SHORTCUTS ═══════════════════
+document.addEventListener('keydown',e=>{
+  const tag=document.activeElement.tagName;
+  if(tag==='INPUT'||tag==='TEXTAREA'||document.activeElement.isContentEditable) return;
+  if(e.key==='Escape'){closePanel();clearHL();srEl.style.display='none';['sql-bg','ana-bg','dict-bg'].forEach(closeModal);closeKb();traceStart=null;}
+  else if((e.ctrlKey||e.metaKey)&&e.key==='f'){e.preventDefault();siEl.focus();siEl.select();}
+  else if((e.ctrlKey||e.metaKey)&&e.key==='z'){e.preventDefault();doUndo();}
+  else if((e.ctrlKey||e.metaKey)&&(e.key==='y'||e.key==='Z')){e.preventDefault();doRedo();}
+  else if((e.ctrlKey||e.metaKey)&&e.shiftKey&&e.key==='F'){e.preventDefault();fitAll();}
+  else if(e.key==='l'||e.key==='L'){document.getElementById('btn-lanes').click();}
+  else if(e.key==='c'||e.key==='C'){document.getElementById('btn-col').click();}
+  else if(e.key==='s'||e.key==='S'){openSql();}
+  else if(e.key==='a'||e.key==='A'){openAna();}
+  else if(e.key==='d'||e.key==='D'){openDict(null);}
+  else if(e.key==='t'||e.key==='T'){document.getElementById('btn-theme').click();}
+  else if(e.key==='?'){document.getElementById('kbhelp').classList.add('open');}
+  else if(e.key==='+'||e.key==='='){sc=Math.min(3,sc*1.15);applyT();}
+  else if(e.key==='-'){sc=Math.max(.18,sc*.85);applyT();}
+  else if(e.key==='ArrowLeft'){px+=40;applyT();}
+  else if(e.key==='ArrowRight'){px-=40;applyT();}
+  else if(e.key==='ArrowUp'){py+=40;applyT();}
+  else if(e.key==='ArrowDown'){py-=40;applyT();}
+  else if(e.key==='g'||e.key==='G'){snapGrid=!snapGrid;toast(snapGrid?'⊡ Snap-to-grid ON':'⊡ Snap-to-grid OFF');}
+});
+
+// ═══════════════════ TOAST ═══════════════════
+let toastT;
+function toast(msg){const el=document.getElementById('toast');el.textContent=msg;el.classList.add('show');clearTimeout(toastT);toastT=setTimeout(()=>el.classList.remove('show'),2800);}
+
+// ═══════════════════ INIT ═══════════════════
+applyT();
+setTimeout(()=>{drawConns();updMM();updStats();},120);
+window.addEventListener('resize',()=>{drawConns();updMM();});
+</script>
+</body>
+</html>
